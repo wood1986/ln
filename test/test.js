@@ -63,7 +63,7 @@ describe("verify the log json", function () {
 
   it("with simple string", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (timestamp, jsonString) {
+    appender.emitter.on("log", function (appender, timestamp, jsonString) {
       var data = JSON.parse(jsonString);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
@@ -79,7 +79,7 @@ describe("verify the log json", function () {
 
   it("with error", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (timestamp, jsonString) {
+    appender.emitter.on("log", function (appender, timestamp, jsonString) {
       var data = JSON.parse(jsonString);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
@@ -95,7 +95,7 @@ describe("verify the log json", function () {
 
   it("with simple string and object", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (timestamp, jsonString) {
+    appender.emitter.on("log", function (appender, timestamp, jsonString) {
       var data = JSON.parse(jsonString);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
@@ -112,7 +112,7 @@ describe("verify the log json", function () {
 
   it("with multiple strings, objects, errors", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (timestamp, jsonString) {
+    appender.emitter.on("log", function (appender, timestamp, jsonString) {
       var data = JSON.parse(jsonString);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
@@ -129,7 +129,7 @@ describe("verify the log json", function () {
 
   it("with multiple strings, objects, errors", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (timestamp, jsonString) {
+    appender.emitter.on("log", function (appender, timestamp, jsonString) {
       var data = JSON.parse(jsonString);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
@@ -146,7 +146,7 @@ describe("verify the log json", function () {
 
   it("with simple string", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (timestamp, jsonString) {
+    appender.emitter.on("log", function (appender, timestamp, jsonString) {
       var data = JSON.parse(jsonString);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
@@ -163,7 +163,7 @@ describe("verify the log json", function () {
 
   it("with simple json", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (timestamp, jsonString) {
+    appender.emitter.on("log", function (appender, timestamp, jsonString) {
       var data = JSON.parse(jsonString);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
