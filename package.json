@@ -1,0 +1,31 @@
+{
+  "name": "ln",
+  "version": "0.0.0",
+  "description": "The BEST JSON logging library for Node.js",
+  "main": "./lib/ln.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "moment": "*"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wood1986/ln.git"
+  },
+  "keywords": [
+    "logging",
+    "log",
+    "ln"
+  ],
+  "author": "WooD",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wood1986/ln/issues"
+  },
+  "homepage": "https://github.com/wood1986/ln"
+}
