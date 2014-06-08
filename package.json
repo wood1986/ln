@@ -9,7 +9,9 @@
   "dependencies": {
     "moment": "*"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "*"
+  },
   "scripts": {
     "test": "mocha"
   },
