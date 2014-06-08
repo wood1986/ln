@@ -1,9 +1,9 @@
 ###ln[![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln)
-#####The BEST JSON logging library for Node.js
+#####The SUPER BEST JSON logging library for Node.js
 
 ###Features
-* Fast file logging
-* Small memory footprint
+* Super fast file logging
+* Super small memory footprint
 * Support cluster logging on the same file with date rotation and custom file naming
 
 ###FAQ
@@ -15,11 +15,13 @@
 #####Code:
     var ln = require("ln");
     ln.PIPE_BUFF = 512; //set it in byte unit and based on the ulimit -a
+                        //default is 4096
                         //for example
                         //pipe size            (512 bytes, -p) 2
                         //ln.PIPE_BUFF = 512 * 2;
                         //this controls the atomicity of the write operation
                         //writes of {PIPE_BUF} or fewer bytes shall be atomic
+                        
     var appenders = [{
        "level": "info",             //tell the appender what the minimum log level should log
        "type": "file",              //define the appender type. "console" and "file" is reserved
@@ -66,7 +68,7 @@
       //as an example to write your custom code
     });
     
-####3. How fast and small?
+####3. How super fast and small is it?
 #####Testing environment
 * Mac mini (Mid 2011)
 * 2.3GHz i5
@@ -78,18 +80,18 @@
 #####Testing result
 `run.sh 100000`|ln|bunyan (0.23.1)|log4js (0.6.14)
 --:|:--:|:--:|:--:
-real|**4.77s**|13.28s|15.28s
-user|**4.47s**|12.19s|14.05s
-sys|**0.42s**|2.77s|2.78s
-maximum resident set size|**72M**|79M|85M
+real|**3.65s**|10.95s|12.84s
+user|**3.56s**|10.56s|12.40s
+sys|**0.13s**|2.25s|2.41s
+maximum resident set size|**77M**|79M|85M
 
-####4. How I can verify your test?
-#####Testing code
+####4. How can I verify your test?
+
 * run `npm install log4js bunyan` in the main directory
 * run `cd benchmark`
 * run `run.sh <# of calling log.info>`
 
-####5. What `n`, `h`, `p`, `v`, `t`, `l`, `m` and `j` in the json message are?
+####5. What are `n`, `h`, `p`, `v`, `t`, `l`, `m` and `j` in the json message?
 * `n`: name of the logger
 * `h`: hostname
 * `p`: process id
@@ -99,7 +101,7 @@ maximum resident set size|**72M**|79M|85M
 * `m`: message
 * `j`: json
 
-####6. Why not using readable name?
+####6. Why do not use a readable name?
 * This can make the write process and the file size slightly faster and smaller respectively.
 
 ####7. Existing logging libraries have rotation problem with cluster module. Why ln don't have this issue?
@@ -112,6 +114,6 @@ maximum resident set size|**72M**|79M|85M
 * File size rotation does not support because keeping track of the file size before writing to the file is overhead and complicated.
 * Logging message is out of order under cluster environment. If you just focus on the logging message from one process, it is in order.
 
-####9. What things are missed?
+####9. What are things missed?
 * Decycle the json
 * Let me know what you want to have?
