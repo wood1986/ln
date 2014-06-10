@@ -1,4 +1,4 @@
-files=("ln" "bunyan" "log4js")
+files=("ln" "bunyan" "log4js" "winston")
 
 for i in "${files[@]}"
 do
