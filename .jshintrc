@@ -7,5 +7,6 @@
   "loopfunc": true,
   "quotmark": "double",
   "noempty": true,
-  "noarg": true
+  "noarg": true,
+  "newcap": false
 }
