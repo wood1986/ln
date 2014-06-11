@@ -47,7 +47,7 @@
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924431,"l":50,"m":"Error: ln\n    at Object.<anonymous> (/Users/wood/Desktop/ln/run.js:27:18)\n    at Module._compile (module.js:456:26)\n    at Object.Module._extensions..js (module.js:474:10)\n    at Module.load (module.js:356:32)\n    at Function.Module._load (module.js:312:12)\n    at Function.Module.runMain (module.js:497:10)\n    at startup (node.js:119:16)\n    at node.js:906:3","j":{"a":true}}
 ####Referencing to existing appenders with another name
 #####Code:
-    logB = logA.clone("b");       
+    logB = logA.clone("b");
     logB.error("Error");           //this is good for distinguishing the log messages from which ln
 #####Output:
     {"n":"b","h":"woods-mac-mini","p":356,"v":0,"t":1402198400244,"l":50,"m":"ln"}
@@ -110,10 +110,10 @@ maximum resident set size|**77.6M**|79.12M|85.2M|433.6M
 * `m`: message
 * `j`: json
 
-####6. Why do ln not use a readable name?
+####6. Why does ln not use a readable name?
 * This can make the write process and the file size slightly faster and smaller respectively.
 
-####7. Existing logging libraries have rotation problem with cluster module. Why do ln not have this issue?
+####7. Existing logging libraries have rotation problem with cluster module. Why does ln not have this issue?
 * Both bunyan and log4js rename the log file on ratation. The dissater happens on file renaming under cluster environment because of double files renaming.
 * bunyan suggests using the process id as a part of the filename to tackle this issue. However, this will generate too many files.
 * log4js provides a multiprocess appender and lets master to do the logging. However, this must have the bottleneck issue.
