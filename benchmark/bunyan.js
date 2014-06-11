@@ -1,3 +1,4 @@
+/* global log:true */
 var bunyan = require("bunyan");
 log = bunyan.createLogger({
   name: "bunyan",

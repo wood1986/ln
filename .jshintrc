@@ -8,5 +8,5 @@
   "quotmark": "double",
   "noempty": true,
   "noarg": true,
-  "newcap": false
+  "trailing": false
 }
