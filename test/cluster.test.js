@@ -52,6 +52,7 @@ describe("big write with log rotation under cluster environment", function() {
         "level": "info"
       };
       ln.PIPE_BUFF = 512;
+      /* jshint newcap: false */
       var log = new ln("ln", [appender]);
       n = 100000;
       var m = 0;

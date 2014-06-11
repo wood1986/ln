@@ -2,15 +2,15 @@
 "use strict";
 var assert = require("assert");
 var ln = require("../lib/ln.js");
+var util = require("util");
 var os = require("os");
 var VERSION = 0;
 
-describe("construct ln", function() {
+describe("ln", function() {
   it("with passing less than 2 arguemnts", function () {
     assert.throws(function() { new ln(); });
     assert.throws(function() { new ln(""); });
   });
-
 
   it("with invalid logger name", function () {
     assert.throws(function() { new ln("", [ { "type": "console", "level": "info" } ]); });
@@ -26,7 +26,7 @@ describe("construct ln", function() {
     assert.throws(function() { new ln("empty", undefined); });
     assert.throws(function() { new ln("empty", ""); });
   });
-  
+
   it("should be fine", function() {
     var a = null;
 
@@ -34,9 +34,11 @@ describe("construct ln", function() {
     assert.ok(a.appenders[0].hasOwnProperty("emitter"));
     assert.ok(a.appenders[0].hasOwnProperty("queue"));
     assert.ok(a.appenders[0].hasOwnProperty("isFlushed"));
+    assert.ok(a.appenders[0].hasOwnProperty("format"));
 
     assert.doesNotThrow(function() { a = new ln("a", [ {"type": "console", "level":"info"} ] ); });
     assert.ok(a.appenders[0].hasOwnProperty("emitter"));
+    assert.ok(a.appenders[0].hasOwnProperty("format"));
 
     var b = a.clone("b");
 
@@ -49,7 +51,7 @@ describe("construct ln", function() {
   });
 });
 
-describe("verify the log json", function () {
+describe("log message", function () {
   var name = "test";
   var message1 = "message1";
   var error1 = new Error("error1");
@@ -63,8 +65,8 @@ describe("verify the log json", function () {
 
   it("with simple string", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (appender, timestamp, jsonString) {
-      var data = JSON.parse(jsonString);
+    appender.emitter.on("log", function (appender, timestamp, string) {
+      var data = JSON.parse(string);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
       assert.strictEqual(data.l, log.appenders[0].level);
@@ -79,8 +81,8 @@ describe("verify the log json", function () {
 
   it("with error", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (appender, timestamp, jsonString) {
-      var data = JSON.parse(jsonString);
+    appender.emitter.on("log", function (appender, timestamp, string) {
+      var data = JSON.parse(string);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
       assert.strictEqual(data.l, log.appenders[0].level);
@@ -95,8 +97,8 @@ describe("verify the log json", function () {
 
   it("with simple string and object", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (appender, timestamp, jsonString) {
-      var data = JSON.parse(jsonString);
+    appender.emitter.on("log", function (appender, timestamp, string) {
+      var data = JSON.parse(string);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
       assert.strictEqual(data.l, log.appenders[0].level);
@@ -112,8 +114,8 @@ describe("verify the log json", function () {
 
   it("with multiple strings, objects, errors", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (appender, timestamp, jsonString) {
-      var data = JSON.parse(jsonString);
+    appender.emitter.on("log", function (appender, timestamp, string) {
+      var data = JSON.parse(string);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
       assert.strictEqual(data.l, log.appenders[0].level);
@@ -129,8 +131,8 @@ describe("verify the log json", function () {
 
   it("with multiple strings, objects, errors", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (appender, timestamp, jsonString) {
-      var data = JSON.parse(jsonString);
+    appender.emitter.on("log", function (appender, timestamp, string) {
+      var data = JSON.parse(string);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
       assert.strictEqual(data.l, log.appenders[0].level);
@@ -146,8 +148,8 @@ describe("verify the log json", function () {
 
   it("with simple string", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (appender, timestamp, jsonString) {
-      var data = JSON.parse(jsonString);
+    appender.emitter.on("log", function (appender, timestamp, string) {
+      var data = JSON.parse(string);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
       assert.strictEqual(data.l, log.appenders[0].level);
@@ -163,8 +165,8 @@ describe("verify the log json", function () {
 
   it("with simple json", function (done) {
     appender.emitter.removeAllListeners();
-    appender.emitter.on("log", function (appender, timestamp, jsonString) {
-      var data = JSON.parse(jsonString);
+    appender.emitter.on("log", function (appender, timestamp, string) {
+      var data = JSON.parse(string);
       assert.strictEqual(data.n, name);
       assert.strictEqual(data.h, os.hostname());
       assert.strictEqual(data.l, log.appenders[0].level);
@@ -176,6 +178,18 @@ describe("verify the log json", function () {
       done();
     });
     log.info(json1);
+  });
+
+  it("with custom formatter", function (done) {
+    appender.emitter.removeAllListeners();
+    appender.format = function (json) {
+      return util.format("[%s] [%s] [%s] - [%s]", json.t, ln.LEVEL[json.l], json.n, json.m);
+    };
+    appender.emitter.on("log", function (appender, timestamp, string) {
+      assert.strictEqual(string, util.format("[%s] [%s] [%s] - [%s]\n", timestamp, ln.LEVEL[log.appenders[0].level], name, message1));
+      done();
+    });
+    log.info(message1);
   });
 });
 
@@ -197,10 +211,10 @@ describe("verify log levels", function () {
     setTimeout(function () {
       assert.strictEqual(count, 5);
       done();
-    }, 10);    
+    }, 10);
   });
 
-  it("with single level", function (done) {
+  it("with a single level", function (done) {
     var log = new ln("level", [ { "type": "test", "level": "fatal" } ]);
     count = 0;
     log.appenders[0].emitter.on("log", add);
@@ -222,7 +236,7 @@ describe("verify log levels", function () {
     ]);
     count = 0;
     log.appenders[0].emitter.on("log", add);
-    log.appenders[1].emitter.on("log", add);    
+    log.appenders[1].emitter.on("log", add);
     log.trace("");
     log.debug("");
     log.info("");

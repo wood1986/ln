@@ -10,10 +10,12 @@
     "moment": "*"
   },
   "devDependencies": {
-    "mocha": "*"
+    "mocha": "*",
+    "glob": "*",
+    "jshint": "*"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "make all"
   },
   "repository": {
     "type": "git",
