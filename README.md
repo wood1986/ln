@@ -1,4 +1,4 @@
-###ln[![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln)
+###ln [![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln)
 #####The SUPER BEST JSON logging library for Node.js
 
 ###Features
@@ -27,9 +27,10 @@
       "type": "file",              //define the appender type. "console" and "file" is reserved
       "path": "[./log.]YYMMDDHHmm",//log to where
                                    //if you want to have log rotation, please define some tokens as a part of the filename
-                                   //for the details of tokens, you can take a look
+                                   //for the details and rules of tokens, you can take a look
                                    //http://momentjs.com/docs/#/displaying/format/
                                    //any chars inside [] will be escaped
+                                   //if you do not need the rotation, you can specify "path" without any tokens, like "[./log]"
       "isUTC": true                //optional. determinie the tokens, "YYMMDDHHmm", is in utc or local time
     }, {
       "level": "info",
@@ -56,7 +57,7 @@
     var log = new ln("a", [{
       "level": "info",
       "type": "console",
-      "format": function(json) {  //define your formatter function in "format" attribute
+      "formatter": function(json) {  //define your formatter function in "format" attribute
         return util.format("[%s] [%s] [%s] - [%s]", json.t, ln.LEVEL[json.l], json.n, json.m);
       }
     }]);
@@ -92,7 +93,7 @@
 real|**3.56s**|10.66s|11.76s|436.04s
 user|**3.47s**|10.29s|11.39s|407.30s
 sys|**0.13s**|2.09s|2.10s|22.76s
-maximum resident set size|**77.6M**|79.12M|85.2M|433.6M
+maximum resident set size|**77.6M**|79.1M|85.2M|433.6M
 
 ####4. How can I verify your test?
 
@@ -121,7 +122,7 @@ maximum resident set size|**77.6M**|79.12M|85.2M|433.6M
 
 ####8. Does ln have limitations?
 * File size rotation does not support because keeping track of the file size before writing to the file is overhead and complicated.
-* Logging message is out of order under cluster environment. If you just focus on the logging message from one process, it is in order.
+* The logging messages are not in order under cluster environment. If you just focus on them from one process, they are in order.
 
 ####9. What are things missed?
 * Decycle the json

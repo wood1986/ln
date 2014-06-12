@@ -1,7 +1,7 @@
 {
   "name": "ln",
-  "version": "0.1.0",
-  "description": "The BEST JSON logging library for Node.js",
+  "version": "0.1.1",
+  "description": "The SUPER BEST JSON logging library for Node.js",
   "main": "./lib/ln.js",
   "directories": {
     "test": "test"

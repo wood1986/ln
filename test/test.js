@@ -4,50 +4,54 @@ var assert = require("assert");
 var ln = require("../lib/ln.js");
 var util = require("util");
 var os = require("os");
+var events = require("events");
 var VERSION = 0;
 
 describe("new ln", function() {
-  it("with passing less than 2 arguemnts", function () {
-    assert.throws(function() { new ln(); });
-    assert.throws(function() { new ln(""); });
+  it("with passing less than 2 arguemnts", function() {
+    assert.throws(function() {
+      new ln();
+      new ln("");
+    });
   });
 
-  it("with invalid logger name", function () {
-    assert.throws(function() { new ln("", [ { "type": "console", "level": "info" } ]); });
-    assert.throws(function() { new ln(null, [ { "type": "console", "level": "info" } ]); });
+  it("with invalid logger name", function() {
+    assert.throws(function() {
+      new ln("", [{ "type": "console", "level": "info" }]);
+      new ln(null, [{ "type": "console", "level": "info" }]);
+    });
   });
 
-  it("with invalid appenders", function () {
-    assert.throws(function() { new ln("empty", []); });
-    assert.throws(function() { new ln("empty", {}); });
-    assert.throws(function() { new ln("empty", null); });
-    assert.throws(function() { new ln("empty", true); });
-    assert.throws(function() { new ln("empty", 1); });
-    assert.throws(function() { new ln("empty", undefined); });
-    assert.throws(function() { new ln("empty", ""); });
+  it("with invalid appenders", function() {
+    assert.throws(function() {
+      new ln("empty", []);
+      new ln("empty", {});
+      new ln("empty", null);
+      new ln("empty", true);
+      new ln("empty", 1);
+      new ln("empty", undefined);
+      new ln("empty", "");
+      new ln("empty", [{ "level": "info", "formatter": [], "emitter": [] }]);
+    });
   });
 
   it("with valid params", function() {
     var a = null;
 
-    assert.doesNotThrow(function() { a = new ln("a", [ {"type": "file", "level":"info"} ] ); });
-    assert.ok(a.appenders[0].hasOwnProperty("emitter"));
-    assert.ok(a.appenders[0].hasOwnProperty("queue"));
-    assert.ok(a.appenders[0].hasOwnProperty("isFlushed"));
-    assert.ok(a.appenders[0].hasOwnProperty("format"));
+    assert.doesNotThrow(function() {
+      a = new ln("a", [{ "type": "file", "level": "info" }]);
+      assert.ok(a.appenders[0].hasOwnProperty("emitter"));
+      assert.ok(a.appenders[0].hasOwnProperty("queue"));
+      assert.ok(a.appenders[0].hasOwnProperty("isFlushed"));
+      assert.ok(a.appenders[0].hasOwnProperty("formatter"));
 
-    assert.doesNotThrow(function() { a = new ln("a", [ {"type": "console", "level":"info"} ] ); });
-    assert.ok(a.appenders[0].hasOwnProperty("emitter"));
-    assert.ok(a.appenders[0].hasOwnProperty("format"));
+      a = new ln("a", [{ "type": "console", "level": "info" }]);
+      assert.ok(a.appenders[0].hasOwnProperty("emitter"));
+      assert.ok(a.appenders[0].hasOwnProperty("formatter"));
 
-    var b = a.clone("b");
-
-    assert.strictEqual(b.fields.n, "b");
-    assert.strictEqual(a.fields.n, "a");
-  });
-
-  it("with invoking clone", function() {
-    assert.throws(function() { new ln("empty", [ {"type": "console", "level":"info"} ] ).clone(""); });
+      a = new ln("a", [{ "level": "info", "emitter": new events.EventEmitter() }]);
+      a = new ln("a", [{ "level": "info", "formatter": JSON.stringify }]);
+    });
   });
 });
 
@@ -182,7 +186,7 @@ describe("log", function () {
 
   it("with a custom formatter", function (done) {
     appender.emitter.removeAllListeners();
-    appender.format = function (json) {
+    appender.formatter = function (json) {
       return util.format("[%s] [%s] [%s] - [%s]", json.t, ln.LEVEL[json.l], json.n, json.m);
     };
     appender.emitter.on("log", function (appender, timestamp, string) {
@@ -198,6 +202,22 @@ describe("verify", function () {
   var add = function () {
     count++;
   };
+
+  it("cloned log", function (done) {
+    var log = new ln("ln", [ { "type": "test", "level": "info" } ]);
+    var clog = log.clone("cln");
+    assert.strictEqual(log.appenders, clog.appenders);
+    assert.strictEqual(log.fields.n, "ln");
+    assert.strictEqual(clog.fields.n, "cln");
+    count = 0;
+    log.appenders[0].emitter.on("log", add);
+    log.info("");
+    clog.info("");
+    setTimeout(function () {
+      assert.strictEqual(count, 2);
+      done();
+    }, 10);
+  });
 
   it("all levels", function (done) {
     var log = new ln("level", [ { "type": "test", "level": "trace" } ]);
