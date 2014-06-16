@@ -76,7 +76,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
+      assert.strictEqual(data.t, timestamp.toJSON());
       assert.strictEqual(data.m, message1);
       done();
     });
@@ -92,7 +92,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
+      assert.strictEqual(data.t, timestamp.toJSON());
       assert.strictEqual(data.m, error1.stack);
       done();
     });
@@ -108,7 +108,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
+      assert.strictEqual(data.t, timestamp.toJSON());
       assert.strictEqual(data.m, message1);
       assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json1));
       done();
@@ -125,7 +125,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
+      assert.strictEqual(data.t, timestamp.toJSON());
       assert.strictEqual(data.m, message2);
       assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json2));
       done();
@@ -142,7 +142,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
+      assert.strictEqual(data.t, timestamp.toJSON());
       assert.strictEqual(data.m, message2);
       assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json2));
       done();
@@ -159,7 +159,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
+      assert.strictEqual(data.t, timestamp.toJSON());
       assert.strictEqual(data.m, message1);
       assert.ok(!data.hasOwnProperty("j"));
       done();
@@ -176,7 +176,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
+      assert.strictEqual(data.t, timestamp.toJSON());
       assert.ok(!data.hasOwnProperty("m"));
       assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json1));
       done();
