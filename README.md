@@ -30,7 +30,9 @@
                                    //for the details and rules of tokens, you can take a look
                                    //http://momentjs.com/docs/#/displaying/format/
                                    //any chars inside [] will be escaped
-                                   //if you do not need the rotation, you can specify "path" without any tokens, like "[./log]"
+                                   //if you do not need the rotation,
+                                   //you can enclose the path with [] to be a static path, like "[./log]"
+                                   //be aware of using [], static path is 400% faster than dynamic path.
       "isUTC": true                //optional. determinie the tokens, "YYMMDDHHmm", is in utc or local time
     }, {
       "level": "info",
@@ -88,12 +90,12 @@
 * Node.js 0.10.29
 
 #####Testing result
-`run.sh 100000`|ln|bunyan (0.23.1)|log4js (0.6.14)|winston (0.7.3)
---:|:--:|:--:|:--:|:--:
-real|**3.56s**|10.66s|11.76s|436.04s
-user|**3.47s**|10.29s|11.39s|407.30s
-sys|**0.13s**|2.09s|2.10s|22.76s
-maximum resident set size|**77.6M**|79.1M|85.2M|433.6M
+`run.sh 100000`|ln(0.1.3)|ln (0.1.2)|bunyan (0.23.1)|log4js (0.6.14)|winston (0.7.3)
+--:|:--:|:--:|:--:|:--:|:--:
+real|**0.90s**|**3.56s**|10.66s|11.76s|436.04s
+user|**0.82s**|**3.47s**|10.29s|11.39s|407.30s
+sys|**0.10s**|**0.13s**|2.09s|2.10s|22.76s
+maximum resident set size|**79.2M**|**77.6M**|79.1M|85.2M|433.6M
 
 ####4. How can I verify your test?
 

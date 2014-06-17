@@ -5,6 +5,8 @@ var ln = require("../lib/ln.js");
 var util = require("util");
 var os = require("os");
 var events = require("events");
+var fs = require("fs");
+var moment = require("moment");
 var VERSION = 0;
 
 describe("new ln", function() {
@@ -32,6 +34,7 @@ describe("new ln", function() {
       new ln("empty", undefined);
       new ln("empty", "");
       new ln("empty", [{ "level": "info", "formatter": [], "emitter": [] }]);
+      new ln("a", [{ "type": "file", "level": "info" }]);
     });
   });
 
@@ -39,11 +42,16 @@ describe("new ln", function() {
     var a = null;
 
     assert.doesNotThrow(function() {
-      a = new ln("a", [{ "type": "file", "level": "info" }]);
+      var path = "[./ln.log]";
+      a = new ln("a", [{ "type": "file", "level": "info", "path": path }]);
       assert.ok(a.appenders[0].hasOwnProperty("emitter"));
       assert.ok(a.appenders[0].hasOwnProperty("queue"));
       assert.ok(a.appenders[0].hasOwnProperty("isFlushed"));
       assert.ok(a.appenders[0].hasOwnProperty("formatter"));
+      assert.ok(a.appenders[0].hasOwnProperty("isStaticPath"));
+      assert.ok(a.appenders[0].isStaticPath);
+      assert.ok(a.appenders[0].isFlushed);
+      assert.strictEqual(a.appenders[0].path, path.slice(1, -1));
 
       a = new ln("a", [{ "type": "console", "level": "info" }]);
       assert.ok(a.appenders[0].hasOwnProperty("emitter"));
@@ -76,7 +84,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp.toJSON());
+      assert.strictEqual(data.t, timestamp);
       assert.strictEqual(data.m, message1);
       done();
     });
@@ -92,7 +100,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp.toJSON());
+      assert.strictEqual(data.t, timestamp);
       assert.strictEqual(data.m, error1.stack);
       done();
     });
@@ -108,7 +116,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp.toJSON());
+      assert.strictEqual(data.t, timestamp);
       assert.strictEqual(data.m, message1);
       assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json1));
       done();
@@ -125,7 +133,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp.toJSON());
+      assert.strictEqual(data.t, timestamp);
       assert.strictEqual(data.m, message2);
       assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json2));
       done();
@@ -142,7 +150,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp.toJSON());
+      assert.strictEqual(data.t, timestamp);
       assert.strictEqual(data.m, message2);
       assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json2));
       done();
@@ -159,7 +167,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp.toJSON());
+      assert.strictEqual(data.t, timestamp);
       assert.strictEqual(data.m, message1);
       assert.ok(!data.hasOwnProperty("j"));
       done();
@@ -176,7 +184,7 @@ describe("log", function () {
       assert.strictEqual(data.l, log.appenders[0].level);
       assert.strictEqual(data.p, process.pid);
       assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp.toJSON());
+      assert.strictEqual(data.t, timestamp);
       assert.ok(!data.hasOwnProperty("m"));
       assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json1));
       done();
@@ -194,6 +202,29 @@ describe("log", function () {
       done();
     });
     log.info(message1);
+  });
+});
+
+describe("file type appender", function () {
+  var path = "", log = null;
+  it("with a fixed path", function () {
+    path = "[./ln.log]";
+    log = new ln("ln", [ { "type": "file", "level": "info", "path": path } ]);
+    log.info("ln");
+    path = path.slice(1, -1);
+    assert.ok(fs.existsSync(path));
+  });
+
+  it("with a date path", function (done) {
+    path = "[./ln.log.]YYYYMMDDHHmmss";
+    log = new ln("ln", [ { "type": "file", "level": "info", "path": path } ]);
+    log.info("ln");
+    assert.ok(fs.existsSync(moment().format(path)));
+    setTimeout(function () {
+      log.info("ln");
+      assert.ok(fs.existsSync(moment().format(path)));
+      done();
+    }, 3);
   });
 });
 
