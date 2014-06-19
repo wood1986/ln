@@ -1,3 +1,5 @@
+rm -rf *.log
+
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
   args="-v"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -9,7 +11,6 @@ files=("ln" "bunyan" "log4js" "winston")
 for i in "${files[@]}"
 do
   echo $i
-  rm -rf "$i.log"
   /usr/bin/time $args node "$i.js" $1 $2
   echo "========================="
 done

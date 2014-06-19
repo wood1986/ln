@@ -7,7 +7,7 @@ var path = "./ln.log.";
 var assert = require("assert");
 
 describe("run ln in cluster environment", function() {
-  this.timeout(30000);
+  this.timeout(60000);
   var n = 0;
   var i = 0;
   it("with large write and frequent log rotation", function(done) {
@@ -26,13 +26,13 @@ describe("run ln in cluster environment", function() {
                     flags: "r",
                     autoClose: true
                   });
+                  var c = "";
+                  var line = "";
                   stream.on("readable", function() {
-                    var c = "";
-                    var line = "";
                     while (null !== (c = stream.read(1))) {
                       c = c.toString();
                       if (c === "\n") {
-                        JSON.stringify(line);
+                        JSON.parse(line);
                         line = "";
                       } else {
                         line += c;
@@ -57,17 +57,15 @@ describe("run ln in cluster environment", function() {
         /* jshint newcap: false */
         var log = new ln("ln", [appender]);
         n = 100000;
-        var m = 0;
-        appender.emitter.on("log", function() {
-          ++m;
-          if (Object.keys(appender.queue).length === 0 && m >= n) {
-            done();
+        var tick = function() {
+          log.info(i);
+          if ((i++) < n) {
+            setImmediate(tick);
+          } else {
             process.exit(0);
           }
-        });
-        for (i = 0; i < n; i++) {
-          log.info(i);
-        }
+        };
+        setImmediate(tick);
       }
     });
   });

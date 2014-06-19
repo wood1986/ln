@@ -208,17 +208,18 @@ describe("log", function () {
 describe("file type appender", function () {
   var path = "", log = null;
   it("with a fixed path", function () {
-    path = "[./ln.log]";
+    path = "[./ln.log][][][][][[][][][][]]";
     log = new ln("ln", [ { "type": "file", "level": "info", "path": path } ]);
     log.info("ln");
-    path = path.slice(1, -1);
-    assert.ok(fs.existsSync(path));
+    assert.ok(log.appenders[0].isStaticPath);
+    assert.ok(fs.existsSync(moment().format(path)));
   });
 
   it("with a date path", function (done) {
     path = "[./ln.log.]YYYYMMDDHHmmss";
     log = new ln("ln", [ { "type": "file", "level": "info", "path": path } ]);
     log.info("ln");
+    assert.ok(!log.appenders[0].isStaticPath);
     assert.ok(fs.existsSync(moment().format(path)));
     setTimeout(function () {
       log.info("ln");

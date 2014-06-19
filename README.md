@@ -90,7 +90,18 @@
 * Node.js 0.10.29
 
 #####Testing result
-`run.sh 100000`|ln (0.1.3)|ln (0.1.2)|bunyan (0.23.1)|log4js (0.6.14)|winston (0.7.3)
+
+#####Thanks Ryan for making the benchmark script async. See [this](https://github.com/wood1986/ln/pull/3)
+
+async `run.sh 100000`|ln (0.1.4)|bunyan (0.23.1)|log4js (0.6.14)|winston (0.7.3)
+--:|:--:|:--:|:--:|:--:
+real|**3.96s**|5.38s|6.59s|257.76s
+user|**3.56s**|4.90s|6.08s|257.25s
+sys|**1.37s**|1.53s|1.56s|7.30s
+maximum resident set size|**32.7M**|32.3M|53.7M|158.9M
+
+
+sync `run.sh 100000`|ln (0.1.3)|ln (0.1.2)|bunyan (0.23.1)|log4js (0.6.14)|winston (0.7.3)
 --:|:--:|:--:|:--:|:--:|:--:
 real|**0.90s**|**3.56s**|10.66s|11.76s|436.04s
 user|**0.82s**|**3.47s**|10.29s|11.39s|407.30s
