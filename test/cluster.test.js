@@ -50,7 +50,7 @@ describe("run ln in cluster environment", function() {
         var ln = require("../lib/ln.js");
         var appender = {
           "type": "file",
-          "path": "[" + path + "]YYYYMMDDHHmmssS",
+          "path": "[" + path + "]YYYYMMDDHHmmss",
           "level": "info"
         };
         ln.PIPE_BUFF = 512;
