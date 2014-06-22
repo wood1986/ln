@@ -1,4 +1,6 @@
-###ln [![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln)
+###ln
+#####master [![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln) develop [![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=develop)](https://travis-ci.org/wood1986/ln)
+
 #####The SUPER BEST JSON logging library for Node.js
 
 ###Features
@@ -53,7 +55,7 @@
     logB = logA.clone("b");
     logB.error("Error");           //this is good for distinguishing the log messages from which ln
 #####Output:
-    {"n":"b","h":"woods-mac-mini","p":356,"v":0,"t":1402198400244,"l":50,"m":"ln"}
+    {"n":"b","h":"woods-mac-mini","p":356,"v":0,"t":1402198400244,"l":50,"m":"Error"}
 ####Creating your formatter
 #####Code:
     var log = new ln("a", [{

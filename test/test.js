@@ -48,10 +48,11 @@ describe("new ln", function() {
       assert.ok(a.appenders[0].hasOwnProperty("queue"));
       assert.ok(a.appenders[0].hasOwnProperty("isFlushed"));
       assert.ok(a.appenders[0].hasOwnProperty("formatter"));
-      assert.ok(a.appenders[0].hasOwnProperty("isStaticPath"));
-      assert.ok(a.appenders[0].isStaticPath);
+      assert.ok(!a.appenders[0].hasOwnProperty("key"));
+      assert.ok(a.appenders[0].hasOwnProperty("formattedPath"));
       assert.ok(a.appenders[0].isFlushed);
-      assert.strictEqual(a.appenders[0].path, path.slice(1, -1));
+      assert.strictEqual(a.appenders[0].path, path);
+      assert.strictEqual(a.appenders[0].formattedPath, moment().format(path));
 
       a = new ln("a", [{ "type": "console", "level": "info" }]);
       assert.ok(a.appenders[0].hasOwnProperty("emitter"));
@@ -211,7 +212,10 @@ describe("file type appender", function () {
     path = "[./ln.log][][][][][[][][][][]]";
     log = new ln("ln", [ { "type": "file", "level": "info", "path": path } ]);
     log.info("ln");
-    assert.ok(log.appenders[0].isStaticPath);
+    assert.ok(log.appenders[0].hasOwnProperty("formattedPath"));
+    assert.ok(!log.appenders[0].hasOwnProperty("period"));
+    assert.ok(!log.appenders[0].hasOwnProperty("next"));
+    assert.strictEqual(log.appenders[0].formattedPath, moment().format(path));
     assert.ok(fs.existsSync(moment().format(path)));
   });
 
@@ -219,7 +223,10 @@ describe("file type appender", function () {
     path = "[./ln.log.]YYYYMMDDHHmmss";
     log = new ln("ln", [ { "type": "file", "level": "info", "path": path } ]);
     log.info("ln");
-    assert.ok(!log.appenders[0].isStaticPath);
+    assert.ok(log.appenders[0].hasOwnProperty("formattedPath"));
+    assert.ok(log.appenders[0].hasOwnProperty("period"));
+    assert.ok(log.appenders[0].hasOwnProperty("next"));
+    assert.strictEqual(log.appenders[0].formattedPath, moment().format(path));
     assert.ok(fs.existsSync(moment().format(path)));
     setTimeout(function () {
       log.info("ln");

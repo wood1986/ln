@@ -1,6 +1,6 @@
 {
   "name": "ln",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "The SUPER BEST JSON logging library for Node.js",
   "main": "./lib/ln.js",
   "directories": {
@@ -12,7 +12,8 @@
   "devDependencies": {
     "mocha": "*",
     "glob": "*",
-    "jshint": "*"
+    "jshint": "*",
+    "async": "*"
   },
   "scripts": {
     "test": "make all"
