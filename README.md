@@ -42,9 +42,9 @@
     }];
 
     var logA = new ln("a", appenders);
-    logA.error("ln");
+    logA.e("ln");
     logA.error(new Error("ln"));
-    logA.error("ln", new Error("ln"), { a: true });  //you can call it with numbers of argument
+    logA.e("ln", new Error("ln"), { a: true });  //you can call it with numbers of argument
                                                      //only the last json and string will used
 #####Output:
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924414,"l":50,"m":"ln"}
@@ -88,27 +88,20 @@
 * 2.3GHz i5
 * 8GB RAM
 * 128GB SSD
-* OS X 10.9.3
-* Node.js 0.10.29
+* OS X 10.10.1
+* Node.js 0.10.33
 
 #####Testing result
 
 #####Thanks Ryan for making the benchmark script async. See [this](https://github.com/wood1986/ln/pull/3)
 
-async `run.sh 100000`|ln (0.1.4)|bunyan (0.23.1)|log4js (0.6.14)|winston (0.7.3)
---:|:--:|:--:|:--:|:--:
-real|**3.96s**|5.38s|6.59s|257.76s
-user|**3.56s**|4.90s|6.08s|257.25s
-sys|**1.37s**|1.53s|1.56s|7.30s
-maximum resident set size|**32.7M**|32.3M|53.7M|158.9M
-
-
-sync `run.sh 100000`|ln (0.1.3)|ln (0.1.2)|bunyan (0.23.1)|log4js (0.6.14)|winston (0.7.3)
+async `run.sh 100000`|ln (0.2.0)|ln (0.1.5)|bunyan (1.2.3)|log4js (0.6.20)|winston (0.8.3)
 --:|:--:|:--:|:--:|:--:|:--:
-real|**0.90s**|**3.56s**|10.66s|11.76s|436.04s
-user|**0.82s**|**3.47s**|10.29s|11.39s|407.30s
-sys|**0.10s**|**0.13s**|2.09s|2.10s|22.76s
-maximum resident set size|**79.2M**|**77.6M**|79.1M|85.2M|433.6M
+real|**4.02s**|4.16s|5.60s|6.51s|6.35s
+user|**3.66s**|3.79s|5.19s|6.10s|5.94s
+sys |**1.35s**|1.35s|1.47s|1.44s|1.44s
+maximum resident set size|**29.8M**|30.6M|52.4M|54.0M|33.6M|
+
 
 ####4. How can I verify your test?
 

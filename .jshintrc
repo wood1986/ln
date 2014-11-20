@@ -8,5 +8,6 @@
   "quotmark": "double",
   "noempty": true,
   "noarg": true,
-  "trailing": false
+  "trailing": false,
+  "sub":true
 }
