@@ -1,5 +1,5 @@
 ###ln
-#####master [![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln) develop [![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=develop)](https://travis-ci.org/wood1986/ln)
+#####master [![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln)
 
 #####The SUPER BEST JSON logging library for Node.js
 
@@ -42,10 +42,16 @@
     }];
 
     var logA = new ln("a", appenders);
-    logA.e("ln");
+    logA.e("ln");                      //Android-like logging signature:
+                                       //log.trace = log.t
+                                       //log.debug = log.d
+                                       //log.info  = log.i
+                                       //log.warn  = log.w
+                                       //log.error = log.e
+                                       //log.fatal = log.f
     logA.error(new Error("ln"));
     logA.e("ln", new Error("ln"), { a: true });  //you can call it with numbers of argument
-                                                     //only the last json and string will used
+                                                 //only the last json and string will used
 #####Output:
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924414,"l":50,"m":"ln"}
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924428,"l":50,"m":"Error: ln\n    at Object.<anonymous> (/Users/wood/Desktop/ln/run.js:26:12)\n    at Module._compile (module.js:456:26)\n    at Object.Module._extensions..js (module.js:474:10)\n    at Module.load (module.js:356:32)\n    at Function.Module._load (module.js:312:12)\n    at Function.Module.runMain (module.js:497:10)\n    at startup (node.js:119:16)\n    at node.js:906:3"}
@@ -70,16 +76,15 @@
     [1402490137999] [INFO] [a] - [format]
 ####Creating your appender
 #####Code:
-    var emitter = new events.EventEmitter();
-    emitter.on("log", function(appender, timestamp, jsonString) {
+    var write = function(timestamp, string) {
       //please refer to the switch case statement
       //inside function ln(name, appenders) from ./lib/ln.js
       //as an example to write your custom code here
     });
 
     var log = new ln("ln", [{
-      "level": "info"             //you just need to specify the "level" attributes for your custom appender
-      "emitter": emitter
+      "level": "info",             //you just need to specify the "level" attributes for your custom appender
+      "write": write
     }]);
 
 ####3. How super fast and small is it?
