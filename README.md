@@ -100,12 +100,16 @@
 
 #####Thanks Ryan for making the benchmark script async. See [this](https://github.com/wood1986/ln/pull/3)
 
-async `run.sh 100000`|ln (0.2.0)|ln (0.1.5)|bunyan (1.2.3)|log4js (0.6.20)|winston (0.8.3)
---:|:--:|:--:|:--:|:--:|:--:
-real|**4.02s**|4.16s|5.60s|6.51s|6.35s
-user|**3.66s**|3.79s|5.19s|6.10s|5.94s
-sys |**1.35s**|1.35s|1.47s|1.44s|1.44s
-maximum resident set size|**29.8M**|30.6M|52.4M|54.0M|33.6M|
+    name    version (a)sync real  user    sys    rss
+    ==================================================
+    bunyan  1.2.3   sync  10.77s  10.43s  2.06s  78MB
+    bunyan  1.2.3   async 5.41s   4.99s   1.42s  32MB
+    log4js  0.6.21  sync  11.79s  11.46s  2.04s  82MB
+    log4js  0.6.21  async 6.68s   6.25s   1.46s  53MB
+    winston 0.8.3   sync  12.32s  11.87s  2.15s  223MB
+    winston 0.8.3   async 6.39s   5.97s   1.41s  33MB
+    ln      0.2.0   sync  *0.96s  *0.85s  *0.1s  *78MB
+    ln      0.2.0   async *4.05s  *3.69s  *1.36s *28MB
 
 
 ####4. How can I verify your test?
