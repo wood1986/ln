@@ -116,7 +116,7 @@
 
 * run `npm install log4js bunyan winston` in the main directory
 * run `cd benchmark`
-* run `run.sh 100000`
+* run `node run.js <num of writes. default is 100000>`
 
 ####5. What are `n`, `h`, `p`, `v`, `t`, `l`, `m` and `j` in the json message?
 * `n`: name of the logger
