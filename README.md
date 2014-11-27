@@ -100,23 +100,23 @@
 
 #####Thanks Ryan for making the benchmark script async. See [this](https://github.com/wood1986/ln/pull/3)
 
-    name    version (a)sync real  user    sys    rss
-    ==================================================
-    bunyan  1.2.3   sync  10.77s  10.43s  2.06s  78MB
-    bunyan  1.2.3   async 5.41s   4.99s   1.42s  32MB
-    log4js  0.6.21  sync  11.79s  11.46s  2.04s  82MB
-    log4js  0.6.21  async 6.68s   6.25s   1.46s  53MB
-    winston 0.8.3   sync  12.32s  11.87s  2.15s  223MB
-    winston 0.8.3   async 6.39s   5.97s   1.41s  33MB
-    ln      0.2.0   sync  *0.96s  *0.85s  *0.1s  *78MB
-    ln      0.2.0   async *4.05s  *3.69s  *1.36s *28MB
+    name    version (a)sync real    user    sys    rss
+    ====================================================
+    bunyan  1.2.3   sync    10.77s  10.43s  2.06s  78MB
+    bunyan  1.2.3   async   5.41s   4.99s   1.42s  32MB
+    log4js  0.6.21  sync    11.79s  11.46s  2.04s  82MB
+    log4js  0.6.21  async   6.68s   6.25s   1.46s  53MB
+    winston 0.8.3   sync    12.32s  11.87s  2.15s  223MB
+    winston 0.8.3   async   6.39s   5.97s   1.41s  33MB
+    ln      0.2.0   sync    0.96s*  0.85s*  0.1s*  78MB*
+    ln      0.2.0   async   4.05s*  3.69s*  1.36s* 28MB*
 
 
 ####4. How can I verify your test?
 
 * run `npm install log4js bunyan winston` in the main directory
 * run `cd benchmark`
-* run `node run.js <num of writes. default is 100000>`
+* run `node run.js <Optional number of writes with default value 100000>`
 
 ####5. What are `n`, `h`, `p`, `v`, `t`, `l`, `m` and `j` in the json message?
 * `n`: name of the logger
