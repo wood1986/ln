@@ -1,4 +1,6 @@
 /* global log:true */
+/* global n:true */
+/* global sync:true */
 sync = process.argv[2] == "sync" ? true : false;
 n = process.argv[3] ? parseInt(process.argv[3]) : 100000;
 
@@ -8,9 +10,9 @@ if (sync) {
   }
 } else {
   var i = 0;
-  function tick() {
+  var tick = function () {
     log.info(i++);
     if (i < n) setImmediate(tick);
-  }
+  };
   setImmediate(tick);
 }

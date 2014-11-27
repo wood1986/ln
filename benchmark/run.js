@@ -1,6 +1,7 @@
+/* global n:true */
 n = process.argv[2] ? parseInt(process.argv[2]) : 100000;
 
-var exec = require('child_process').exec;
+var exec = require("child_process").exec;
 var async = require("async");
 var util = require("util");
 var os = require("os");
@@ -11,7 +12,7 @@ var files = [
   "winston",
   "ln"
 ];
-var tasks = new Array();
+var tasks = [];
 for (var i = 0; i < files.length; i++) {
   var arg = os.type();
   if (arg == "Darwin") {
@@ -39,7 +40,7 @@ console.log("%s\t%s\t%s\t%s\t%s\t%s", "name", "(a)sync", "real", "user", "sys", 
 console.log("=============================================");
 async.eachSeries(tasks,
   function (task, callback) {
-    child = exec(task.cmd, function (error, stdout, stderr) {
+    exec(task.cmd, function (error, stdout, stderr) {
       var array = stderr.split(/\D+?.\D+/g);
       array = array.splice(1, array.length - 2);
       console.log("%s\t%s\t%ds\t%ds\t%ds\t%sMB", task.name, (task.async ? "async" : "sync"), array[0], array[1], array[2], array[3] >> 20);
