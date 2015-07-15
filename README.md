@@ -54,7 +54,8 @@
     logA.error(new Error("ln"));
     logA.e("ln", new Error("ln"), { a: true });  //you can call it with numbers of argument
                                                  //only the last json and string will used
-    
+
+
     //Output:
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924414,"l":50,"m":"ln"}
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924428,"l":50,"m":"Error: ln\n    at Object.<anonymous> (/Users/wood/Desktop/ln/run.js:26:12)\n    at Module._compile (module.js:456:26)\n    at Object.Module._extensions..js (module.js:474:10)\n    at Module.load (module.js:356:32)\n    at Function.Module._load (module.js:312:12)\n    at Function.Module.runMain (module.js:497:10)\n    at startup (node.js:119:16)\n    at node.js:906:3"}
@@ -65,6 +66,7 @@
     //Code:
     logB = logA.clone("b");
     logB.error("Error");           //this is good for distinguishing the log messages from which ln
+
 
     //Output:
     {"n":"b","h":"woods-mac-mini","p":356,"v":0,"t":1402198400244,"l":50,"m":"Error"}
@@ -80,6 +82,7 @@
       }
     }]);
     log.info("format");
+
 
     //Output:
     [1402490137999] [INFO] [a] - [format]
@@ -108,8 +111,8 @@ Mac mini (Mid 2011)
 * 2.3GHz i5
 * 8GB RAM
 * 128GB SSD
-* OS X 10.10.1
-* Node.js 0.10.33
+* OS X 10.10.4
+* Node.js 0.12.7
 
 #### Testing result
 
@@ -117,14 +120,14 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 
     name    version (a)sync real    user    sys    rss
     ====================================================
-    bunyan  1.2.3   sync    10.77s  10.43s  2.06s  78MB
-    bunyan  1.2.3   async   5.41s   4.99s   1.42s  32MB
-    log4js  0.6.21  sync    11.79s  11.46s  2.04s  82MB
-    log4js  0.6.21  async   6.68s   6.25s   1.46s  53MB
-    winston 0.8.3   sync    12.32s  11.87s  2.15s  223MB
-    winston 0.8.3   async   6.39s   5.97s   1.41s  33MB
-    ln      0.2.0   sync    0.96s*  0.85s*  0.1s*  78MB*
-    ln      0.2.0   async   4.05s*  3.69s*  1.36s* 28MB*
+    bunyan  1.3.4   sync    5.68s   4.55s   1.38s  81MB
+    bunyan  1.3.4   async   6.17s   5.78s   1.42s  36MB
+    log4js  0.6.22  sync    6.67s   5.54s   1.41s  76MB
+    log4js  0.6.22  async   7.45s   7.06s   1.46s  31MB
+    winston 0.9.0   sync    8.47s   7.18s   1.62s  280MB
+    winston 0.9.0   async   8.17s   8.29s   1.56s  69MB
+    ln      0.2.2   sync    1.07s*  0.98s*  0.1s*  87MB
+    ln      0.2.2   async   4.57s*  4.24s*  1.33s* 25MB*
 
 
 ### 4. How can I verify your test?
