@@ -1,7 +1,7 @@
 jshint:
 	./node_modules/.bin/jshint benchmark lib test
 
-test:
+test: clean
 	./node_modules/.bin/mocha --reporter spec
 
 clean:

@@ -1,22 +1,22 @@
-# ln
-master [![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln)
-
-A SUPER BEST JSON logging library for Node.js
+[![Build Status](https://travis-ci.org/wood1986/ln.svg?branch=master)](https://travis-ci.org/wood1986/ln)
 
 ## Features
+
 * Super fast file logging
 * Super small memory footprint
 * Support cluster logging on the same file with date rotation and custom file naming
 
 ## FAQ
+
 ### 1. How to install?
-     npm install ln
+
+    npm install ln
 
 ### 2. How to use it?
 
 #### Instantiating ln
-Code:
 
+    //Code:
     var ln = require("ln");
     ln.PIPE_BUFF = 512; //set it in byte unit and based on the ulimit -a
                         //default is 4096
@@ -54,24 +54,24 @@ Code:
     logA.error(new Error("ln"));
     logA.e("ln", new Error("ln"), { a: true });  //you can call it with numbers of argument
                                                  //only the last json and string will used
-Output:
-
+    
+    //Output:
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924414,"l":50,"m":"ln"}
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924428,"l":50,"m":"Error: ln\n    at Object.<anonymous> (/Users/wood/Desktop/ln/run.js:26:12)\n    at Module._compile (module.js:456:26)\n    at Object.Module._extensions..js (module.js:474:10)\n    at Module.load (module.js:356:32)\n    at Function.Module._load (module.js:312:12)\n    at Function.Module.runMain (module.js:497:10)\n    at startup (node.js:119:16)\n    at node.js:906:3"}
     {"n":"a","h":"woods-mac-mini","p":340,"v":0,"t":1402197924431,"l":50,"m":"Error: ln\n    at Object.<anonymous> (/Users/wood/Desktop/ln/run.js:27:18)\n    at Module._compile (module.js:456:26)\n    at Object.Module._extensions..js (module.js:474:10)\n    at Module.load (module.js:356:32)\n    at Function.Module._load (module.js:312:12)\n    at Function.Module.runMain (module.js:497:10)\n    at startup (node.js:119:16)\n    at node.js:906:3","j":{"a":true}}
 
 #### Referencing to existing appenders with another name
-Code:
 
+    //Code:
     logB = logA.clone("b");
     logB.error("Error");           //this is good for distinguishing the log messages from which ln
-Output:
 
+    //Output:
     {"n":"b","h":"woods-mac-mini","p":356,"v":0,"t":1402198400244,"l":50,"m":"Error"}
 
 #### Creating your formatter
-Code:
 
+    //Code:
     var log = new ln("a", [{
       "level": "info",
       "type": "console",
@@ -80,13 +80,13 @@ Code:
       }
     }]);
     log.info("format");
-Output:
 
+    //Output:
     [1402490137999] [INFO] [a] - [format]
 
 #### Creating your appender
-Code:
 
+    //Code:
     var write = function(timestamp, string) {
       //please refer to the switch case statement
       //inside function ln(name, appenders) from ./lib/ln.js
@@ -100,7 +100,9 @@ Code:
 
 
 ### 3. How super fast and small is it?
+
 #### Testing environment
+
 Mac mini (Mid 2011)
 
 * 2.3GHz i5
@@ -110,6 +112,7 @@ Mac mini (Mid 2011)
 * Node.js 0.10.33
 
 #### Testing result
+
 Thanks Ryan for making the benchmark script async. See [this](https://github.com/wood1986/ln/pull/3)
 
     name    version (a)sync real    user    sys    rss
@@ -131,6 +134,7 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 * run `node run.js <Optional number of writes with default value 100000>`
 
 ### 5. What are `n`, `h`, `p`, `v`, `t`, `l`, `m` and `j` in the json message?
+
 * `n`: name of the logger
 * `h`: hostname
 * `p`: process id
@@ -141,18 +145,22 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 * `j`: json
 
 ### 6. Why does ln not use a readable name?
+
 * This can make the write process and the file size slightly faster and smaller respectively.
 
 ### 7. Existing logging libraries have rotation problem with cluster module. Why does ln not have this issue?
+
 * Both bunyan and log4js rename the log file on ratation. The dissater happens on file renaming under cluster environment because of double files renaming.
 * bunyan suggests using the process id as a part of the filename to tackle this issue. However, this will generate too many files.
 * log4js provides a multiprocess appender and lets master to do the logging. However, this must have the bottleneck issue.
 * To solve this, I just use `fs.createWriteStream(name, {"flags": "a"})` to create formatted log file at the beginning instead of `fs.rename` at the end. I tested this apporoach with millisecond rotation under cluster environment and no dissaters occured.
 
 ### 8. Does ln have limitations?
+
 * File size rotation does not support because keeping track of the file size before writing to the file is overhead and complicated.
 * The logging messages are not in order under cluster environment. If you just focus on them from one process, they are in order.
 
 ### 9. What are things missed?
+
 * Decycle the json
 * Let me know what you want to have?

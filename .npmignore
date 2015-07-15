@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+*.log
+benchmark/
+test/
+*.yml
+README.md
+.gitignore
+.jshintrc
+Makefile
+

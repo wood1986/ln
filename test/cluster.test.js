@@ -20,7 +20,7 @@ describe("run ln in cluster environment", function() {
           var worker = cluster.fork();
           stats[worker.process.pid.toString()] = -1;
           cluster.on("exit", function() {
-            if (--m === 0) {
+            if (!--m) {
               glob(path + "*", {}, function(err, matches) {
                 if (err) {
                   throw err;
@@ -30,10 +30,10 @@ describe("run ln in cluster environment", function() {
                     flags: "r",
                     autoClose: true
                   });
-                  var c = "";
-                  var line = "";
+                  var c = "",
+                      line = "";
                   stream.on("readable", function() {
-                    while (null !== (c = stream.read(1))) {
+                    while ((c = stream.read(1))) {
                       c = c.toString();
                       if (c === "\n") {
                         var json = JSON.parse(line);
