@@ -6,6 +6,6 @@ test/
 *.yml
 README.md
 .gitignore
-.jshintrc
+.eslintrc
 Makefile
 

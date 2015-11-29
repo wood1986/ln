@@ -1,5 +1,9 @@
-/* global log:true */
-log = require("winston");
-log.add(log.transports.File, { filename: "winston.log" });
+"use strict";
+
+var log = require("winston");
+
+log.add(log.transports.File, {
+  "filename": "winston.log"
+});
 log.remove(log.transports.Console);
-require("./common.js");
+require("./common.js")(log);

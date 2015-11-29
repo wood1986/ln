@@ -1,12 +1,13 @@
-jshint:
-	./node_modules/.bin/jshint benchmark lib test
+eslint:
+	./node_modules/.bin/eslint benchmark lib test
 
 test: clean
-	./node_modules/.bin/mocha --reporter spec
+	./node_modules/.bin/mocha ./test/test.js --reporter spec
+	node ./test/cluster.test.js
 
 clean:
-	rm -rf ln.log*
+	git clean -xf
 
-all: clean jshint test
+all: clean eslint test
 
 .PHONY: test

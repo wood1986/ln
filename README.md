@@ -6,6 +6,18 @@
 * Super small memory footprint
 * Support cluster logging on the same file with date rotation and custom file naming
 
+## Changelog 0.3.0
+
+* Prepare the deprecation for `ln.clone(name)`, `ln(name, appenders)` and `PIPE_BUFF`.
+  * `ln.clone(name) -> new ln(name, ln)`
+  * `new ln(name, appenders) -> new ln({"name": name, "appenders": appenders})`
+  * `PIPE_BUFF -> PIPE_BUF`
+* Modularize the console and file appender
+* Increase the logging performance by ~5%
+* Fix the filename bug when isUTC is true
+* Pre-define the default values for certain parameters
+* Update README.md
+
 ## FAQ
 
 ### 1. How to install?
@@ -18,42 +30,44 @@
 
     //Code:
     var ln = require("ln");
-    ln.PIPE_BUFF = 512; //set it in byte unit and based on the ulimit -a
-                        //default is 4096
-                        //for example
+    ln.PIPE_BUF = 512;  //Set it in byte unit and based on the ulimit -a.
+                        //Default is 4096.
+                        //For example,
                         //pipe size            (512 bytes, -p) 2
-                        //ln.PIPE_BUFF = 512 * 2;
-                        //this controls the atomicity of the write operation
-                        //writes of {PIPE_BUF} or fewer bytes shall be atomic
+                        //ln.PIPE_BUF = 512 * 2;
+                        //This controls the atomicity of the write operation.
+                        //Writes of {PIPE_BUF} or fewer bytes shall be atomic
 
     var appenders = [{
-      "level": "info",             //tell the appender what the minimum log level should log
-      "type": "file",              //define the appender type. "console" and "file" is reserved
-      "path": "[./log.]YYMMDDHHmm",//log to where
-                                   //if you want to have log rotation, please define some tokens as a part of the filename
-                                   //for the details and rules of tokens, you can take a look
-                                   //http://momentjs.com/docs/#/displaying/format/
-                                   //any chars inside [] will be escaped
-                                   //if you do not need the rotation,
-                                   //you can enclose the path with [] to be a static path, like "[./log]"
-                                   //be aware of using [], static path is 400% faster than dynamic path.
-      "isUTC": true                //optional. determinie the tokens, "YYMMDDHHmm", is in utc or local time
+      "level": "info",              //Optional. It tells the appender what level should log.
+                                    //Default level will be "INFO" and "TRACE" if NODE_ENV=production and NODE_ENV=development respectively.
+      "type": "file",               //It defines the appender type. "file" is reserved and "console" is the default appender.
+      "path": "[./log.]YYMMDDHHmm", //It defines the name and path of the log file.
+                                    //If you want to have log rotation, please define some tokens as a part of the filename.
+                                    //For the details and rules of tokens, you can take a look
+                                    //http://momentjs.com/docs/#/displaying/format/.
+                                    //Any chars inside [] will be escaped
+                                    //If you do not need the rotation,
+                                    //You can enclose the path with [] to be a static path, like "[./log]".
+                                    //Be aware of using [], static path is 400% faster than dynamic path.
+      "isUTC": true                 //Optional. It determines the tokens, "YYMMDDHHmm", is in UTC or local time
+                                    //Default is true.
     }, {
       "level": "info",
-      "type": "console"            //directly ouput to console
+      "type": "console"             //It directly outputs to console.
     }];
 
-    var logA = new ln("a", appenders);
-    logA.e("ln");                      //Android-like logging signature:
-                                       //log.trace = log.t
-                                       //log.debug = log.d
-                                       //log.info  = log.i
-                                       //log.warn  = log.w
-                                       //log.error = log.e
-                                       //log.fatal = log.f
-    logA.error(new Error("ln"));
-    logA.e("ln", new Error("ln"), { a: true });  //you can call it with numbers of argument
-                                                 //only the last json and string will used
+    var log = new ln({"name": "a", "appenders": appenders});
+    log.e("ln");  //Android-like logging signature:
+                  //log.trace = log.t
+                  //log.debug = log.d
+                  //log.info  = log.i
+                  //log.warn  = log.w
+                  //log.error = log.e
+                  //log.fatal = log.f
+    log.error(new Error("ln"));
+    log.e("ln", new Error("ln"), { a: true });  //You can pass numbers of argument,
+                                                //however, only the last JSON and string will used.
 
 
     //Output:
@@ -64,8 +78,8 @@
 #### Referencing to existing appenders with another name
 
     //Code:
-    logB = logA.clone("b");
-    logB.error("Error");           //this is good for distinguishing the log messages from which ln
+    logB = new ln("b", logA);
+    logB.error("Error");  //This is good for distinguishing the log messages from which ln
 
 
     //Output:
@@ -74,13 +88,16 @@
 #### Creating your formatter
 
     //Code:
-    var log = new ln("a", [{
-      "level": "info",
-      "type": "console",
-      "formatter": function(json) {  //define your formatter function in "format" attribute
-        return util.format("[%s] [%s] [%s] - [%s]", json.t, ln.LEVEL[json.l], json.n, json.m);
-      }
-    }]);
+    var log = new ln({
+      "name": "a",
+      "appenders": [
+        {
+          "formatter": function (json) {  //It customizes the log format.
+            return util.format("[%s] [%s] [%s] - [%s]", json.t, ln.LEVEL[json.l], json.n, json.m);
+          }
+        }
+      ]
+    })
     log.info("format");
 
 
@@ -91,16 +108,29 @@
 
     //Code:
     var write = function(timestamp, string) {
-      //please refer to the switch case statement
-      //inside function ln(name, appenders) from ./lib/ln.js
+      //please refer to consoleAppender or fileAppender
       //as an example to write your custom code here
     });
 
-    var log = new ln("ln", [{
-      "level": "info",             //you just need to specify the "level" attributes for your custom appender
+    var log = new ln({"name": "b", "appenders": [
+      "level": "info"
       "write": write
-    }]);
+    ]});
 
+#### Hidden ways of instantiating
+
+    //Code:
+    var log = new ln({
+      "name": "a",
+      "level": "info",  //The level and formatter are shared across the appenders.
+                        //The level and formatter inside the appenders take the highest priority.
+      "formatter": function (json) {
+        return util.format("[%s] [%s] [%s] - [%s]", json.t, ln.LEVEL[json.l], json.n, json.m);
+      },
+      "appenders": [
+        ...
+      ]
+    );
 
 ### 3. How super fast and small is it?
 
@@ -111,8 +141,8 @@ Mac mini (Mid 2011)
 * 2.3GHz i5
 * 8GB RAM
 * 128GB SSD
-* OS X 10.10.4
-* Node.js 0.12.7
+* OS X 10.11.1
+* Node.js 5.1.0
 
 #### Testing result
 
@@ -120,15 +150,16 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 
     name    version (a)sync real    user    sys    rss
     ====================================================
-    bunyan  1.3.4   sync    5.68s   4.55s   1.38s  81MB
-    bunyan  1.3.4   async   6.17s   5.78s   1.42s  36MB
-    log4js  0.6.22  sync    6.67s   5.54s   1.41s  76MB
-    log4js  0.6.22  async   7.45s   7.06s   1.46s  31MB
-    winston 0.9.0   sync    8.47s   7.18s   1.62s  280MB
-    winston 0.9.0   async   8.17s   8.29s   1.56s  69MB
-    ln      0.2.2   sync    1.07s*  0.98s*  0.1s*  87MB
-    ln      0.2.2   async   4.57s*  4.24s*  1.33s* 25MB*
-
+    bunyan  1.5.1   sync    3.30s   3.21s   0.09s  83MB
+    bunyan  1.5.1   async   5.90s   5.45s   1.53s  29MB
+    log4js  0.6.29  sync    4.46s   4.38s   0.09s  77MB
+    log4js  0.6.29  async   7.64s   7.18s   1.82s  30MB
+    winston 2.1.1   sync    6.33s   6.17s   0.19s  265MB
+    winston 2.1.1   async   8.42s   7.83s   1.85s  48MB
+    ln      0.3.0   sync    1.11s*  1.01s*  0.11s  89MB
+    ln      0.3.0   async   3.92s*  3.55s*  1.48s* 26MB*
+    ln      0.2.2   sync    1.18s   1.09s   0.10s  88MB
+    ln      0.2.2   async   4.03s   3.67s   1.39s  22MB
 
 ### 4. How can I verify your test?
 
@@ -142,7 +173,7 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 * `h`: hostname
 * `p`: process id
 * `v`: version of the format
-* `t`: timestamp in utc
+* `t`: timestamp in UTC
 * `l`: level
 * `m`: message
 * `j`: json
@@ -153,10 +184,10 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 
 ### 7. Existing logging libraries have rotation problem with cluster module. Why does ln not have this issue?
 
-* Both bunyan and log4js rename the log file on ratation. The dissater happens on file renaming under cluster environment because of double files renaming.
+* Both bunyan and log4js rename the log file on rotation. The disaster happens on file renaming under cluster environment because of double files renaming.
 * bunyan suggests using the process id as a part of the filename to tackle this issue. However, this will generate too many files.
 * log4js provides a multiprocess appender and lets master to do the logging. However, this must have the bottleneck issue.
-* To solve this, I just use `fs.createWriteStream(name, {"flags": "a"})` to create formatted log file at the beginning instead of `fs.rename` at the end. I tested this apporoach with millisecond rotation under cluster environment and no dissaters occured.
+* To solve this, I just use `fs.createWriteStream(name, {"flags": "a"})` to create formatted log file at the beginning instead of `fs.rename` at the end. I tested this approach with millisecond rotation under cluster environment and no disasters occurred.
 
 ### 8. Does ln have limitations?
 

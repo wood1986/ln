@@ -1,9 +1,10 @@
-/* global log:true */
+"use strict";
+
 var ln = require("../lib/ln.js");
-ln.PIPE_BUFF = 512;
-log = new ln("ln", [{
+
+var log = new ln("ln", [{ // eslint-disable-line new-cap
   "type": "file",
-  "path": "[./ln.log]",
-  "level": "info"
+  "path": "[./ln.log]"
 }]);
-require("./common.js");
+
+require("./common.js")(log);

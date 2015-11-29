@@ -1,18 +1,23 @@
-/* global log:true */
-/* global n:true */
-/* global sync:true */
-sync = process.argv[2] == "sync" ? true : false;
-n = process.argv[3] ? parseInt(process.argv[3]) : 100000;
+"use strict";
 
-if (sync) {
-  for (var i = 0; i < n; i++) {
-    log.info(i);
-  }
-} else {
+module.exports = function (log) {
+  var sync = process.argv[2] === "sync",
+      n = process.argv[3] ? parseInt(process.argv[3], 10) : 100000;
+
   var i = 0;
-  var tick = function () {
-    log.info(i++);
-    if (i < n) setImmediate(tick);
-  };
-  setImmediate(tick);
-}
+
+  if (sync) {
+    for (i; i < n; i++) {
+      log.info(i);
+    }
+  } else {
+    var tick = function () {
+      log.info(i++);
+      if (i < n) {
+        setImmediate(tick);
+      }
+    };
+
+    setImmediate(tick);
+  }
+};

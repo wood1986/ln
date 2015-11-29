@@ -1,18 +1,15 @@
 {
   "name": "ln",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "The SUPER BEST JSON logging library for Node.js",
   "main": "./lib/ln.js",
-  "directories": {
-    "test": "test"
-  },
   "dependencies": {
     "moment": "*"
   },
   "devDependencies": {
     "mocha": "*",
-    "glob": "*",
-    "jshint": "*",
+    "micromatch": "*",
+    "eslint": "*",
     "async": "*"
   },
   "scripts": {

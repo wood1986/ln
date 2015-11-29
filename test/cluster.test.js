@@ -1,87 +1,99 @@
-/*global describe, it*/
 "use strict";
-var cluster = require("cluster");
-var fs = require("fs");
-var glob = require("glob");
-var path = "./ln.log.";
-var assert = require("assert");
-var async = require("async");
 
-describe("run ln in cluster environment", function() {
-  this.timeout(10000);
-  var n = 1000; //#calling log.info
-  var i = 0;
-  it("with large write and frequent log rotation", function(done) {
-    assert.doesNotThrow(function() {
-      if (cluster.isMaster) {
-        var stats = {};
-        var m = 4; //spawn m processes
-        for (i = 0; i < m; i++) {
-          var worker = cluster.fork();
-          stats[worker.process.pid.toString()] = -1;
-          cluster.on("exit", function() {
-            if (!--m) {
-              glob(path + "*", {}, function(err, matches) {
-                if (err) {
-                  throw err;
-                }
-                async.eachSeries(matches, function(file, callback) {
-                  var stream = fs.createReadStream(file, {
-                    flags: "r",
-                    autoClose: true
-                  });
-                  var c = "",
-                      line = "";
-                  stream.on("readable", function() {
-                    while ((c = stream.read(1))) {
-                      c = c.toString();
-                      if (c === "\n") {
-                        var json = JSON.parse(line);
-                        assert.strictEqual(json.t % 1000, parseInt(file.substring(file.length - 3))); //check whether the log messages exist in the correct file
-                        assert.strictEqual(stats[json.p.toString()] + 1, json.m);                     //check whether the log message is in order for each process
-                        stats[json.p.toString()] = json.m;
-                        line = "";
-                      } else {
-                        line += c;
-                      }
-                    }
-                    stream.resume();
-                  });
-                  stream.on("end", function() {
-                    callback();
-                  });
-                }, function() {
-                  for (var p in log) {
-                    assert.strictEqual(stats[p], n - 1);
-                  }
-                  done();
-                });
-              });
+var cluster = require("cluster"),
+    assert = require("assert"),
+    fs = require("fs"),
+    os = require("os");
+
+if (cluster.isMaster) {
+  var i = 0,
+      n = require("os").cpus().length;
+
+  while (i++ < n) cluster.fork(); // eslint-disable-line curly
+  i = 0;
+  cluster.on("exit", function (worker, code, signal) {
+    assert.deepStrictEqual(code, 0);
+    assert(!signal);
+  });
+} else {
+  var ln = require("../lib/ln.js"),
+      mm = require("micromatch"),
+      util = require("util"),
+      async = require("async");
+
+  var log = new ln({  // eslint-disable-line new-cap
+    "name": "cluster",
+    "appenders": [
+        {
+          "type": "file",
+          "path": util.format("[./cluster.%d.]x[.log]", process.pid)
+        }
+    ]
+  });
+
+  async.times(
+    10000,
+    function (n, callback) {
+      log.i(n);
+      setImmediate(callback);
+    },
+    function (err) {
+      if (err) {
+        throw err;
+      }
+
+      async.until(
+        function () {
+          return Object.keys(log.appenders[0].queue).length === 0;
+        },
+        function (callback) {
+          setImmediate(callback);
+        },
+        function (err) {
+          if (err) {
+            throw err;
+          }
+
+          fs.readdir("./", function (err, files) {
+            if (err) {
+              throw err;
             }
+
+            var i = 0;
+
+            async.eachSeries(
+              mm(files, util.format("cluster.%d.*.log", process.pid)),
+              function (file, callback) {
+                var rl = require("readline").createInterface(
+                    {
+                      "input": fs.createReadStream(
+                        file,
+                          {
+                            "flag": "r",
+                            "autoClose": true
+                          }
+                      )
+                    }
+                  );
+
+                rl.on("line", function (line) {
+                  var json = JSON.parse(line);
+
+                  assert.deepStrictEqual(json.n, "cluster");
+                  assert.deepStrictEqual(json.v, 0);
+                  assert.deepStrictEqual(json.h, os.hostname());
+                  assert.deepStrictEqual(json.l, 30);
+                  assert.deepStrictEqual(json.p, process.pid);
+                  assert.deepStrictEqual(json.t, parseInt(file.split(".")[2], 10));
+                  assert.deepStrictEqual(json.m, i++);
+                });
+                rl.on("close", callback);
+              },
+              process.exit
+            );
           });
         }
-      } else {
-        var ln = require("../lib/ln.js");
-        var appender = {
-          "type": "file",
-          "path": "[" + path + "]YYYYMMDDHHmmssSSS",
-          "level": "info"
-        };
-        ln.PIPE_BUFF = 512;
-        /* jshint newcap: false */
-        var log = new ln("ln", [appender]);
-        var tick = function() {
-          log.info(i++);
-          if (i < n) {
-            setImmediate(tick);
-          } else {
-            setTimeout(function () {
-              process.exit(0);
-            }, 100); //provide enough time for the write process
-          }
-        };
-        setImmediate(tick);
-      }
-    });
-  });
-});
+      );
+    }
+  );
+}

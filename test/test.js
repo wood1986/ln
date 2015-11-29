@@ -1,276 +1,278 @@
-/*global describe, it*/
+/* eslint-disable new-cap, no-new, no-sync*/
+
 "use strict";
-var assert = require("assert");
-var ln = require("../lib/ln.js");
-var util = require("util");
-var os = require("os");
-var fs = require("fs");
-var moment = require("moment");
+
+var assert = require("assert"),
+    ln = require("../lib/ln.js"),
+    os = require("os"),
+    fs = require("fs"),
+    moment = require("moment");
+
 var VERSION = 0;
 
-describe("new ln", function() {
-  it("with passing less than 2 arguemnts", function() {
-    assert.throws(function() {
-      new ln();
-      new ln("");
+describe("Instantiate an object", function () {
+  describe("with invalid parameters", function () {
+    it("should throw an exception", function () {
+      assert.throws(function () {
+        new ln();
+      });
+      assert.throws(function () {
+        new ln({"appenders": []});
+      });
+      assert.throws(function () {
+        new ln({"name": "ln", "appenders": [{"level": "ln"}]});
+      });
+      assert.throws(function () {
+        new ln({"name": "ln", "appenders": [{"formatter": {}}]});
+      });
+      assert.throws(function () {
+        new ln({"name": "ln", "appenders": [{"write": {}}]});
+      });
+      assert.throws(function () {
+        new ln("ln");
+      });
+      assert.throws(function () {
+        new ln("ln", []);
+      });
+      assert.throws(function () {
+        new ln("ln", {});
+      });
+      assert.throws(function () {
+        new ln({"name": "ln", "appenders": [{"type": "file"}]});
+      });
     });
   });
 
-  it("with invalid logger name", function() {
-    assert.throws(function() {
-      new ln("", [{ "type": "console", "level": "info" }]);
-      new ln(null, [{ "type": "console", "level": "info" }]);
+  describe("with valid parameters", function () {
+    it("should not throw an exception", function () {
+      assert.doesNotThrow(function () {
+        new ln("ln", new ln({"name": "ln", "appenders": [{"type": "console"}]}));
+        new ln({"name": "ln", "appenders": [{"type": "file", "path": "./a"}]});
+        new ln("ln", [{"type": "console"}]);
+        new ln("", [{}]);
+      });
     });
-  });
 
-  it("with invalid appenders", function() {
-    assert.throws(function() {
-      new ln("empty", []);
-      new ln("empty", {});
-      new ln("empty", null);
-      new ln("empty", true);
-      new ln("empty", 1);
-      new ln("empty", undefined);
-      new ln("empty", "");
-      new ln("empty", [{ "level": "info", "formatter": [] }]);
-      new ln("a", [{ "type": "file", "level": "info" }]);
+    it("should have t, d, i, w, e, f, trace, debug, info, warn, error, fatal", function () {
+      var log = new ln({"name": "ln", "appenders": [{}]});
+
+      assert(log.t);
+      assert(log.d);
+      assert(log.i);
+      assert(log.w);
+      assert(log.e);
+      assert(log.f);
+
+      assert(log.trace);
+      assert(log.debug);
+      assert(log.info);
+      assert(log.warn);
+      assert(log.error);
+      assert(log.fatal);
+
+      assert.strictEqual(log.t, log.trace);
+      assert.strictEqual(log.d, log.debug);
+      assert.strictEqual(log.i, log.info);
+      assert.strictEqual(log.w, log.warn);
+      assert.strictEqual(log.e, log.error);
+      assert.strictEqual(log.f, log.fatal);
     });
-  });
 
-  it("with valid params", function() {
-    var a = null;
+    it("should have correct level and formatter attribute", function () {
+      var formatter0 = function () { },
+          formatter1 = function () { },
+          log = new ln({"name": "ln", "level": "info", "formatter": formatter0, "appenders": [{}, {"level": "trace", "formatter": formatter1}]});
 
-    assert.doesNotThrow(function() {
-      var path = "[./ln.log]";
-      a = new ln("a", [{ "type": "file", "level": "info", "path": path }]);
-      assert.ok(a.appenders[0].hasOwnProperty("queue"));
-      assert.ok(a.appenders[0].hasOwnProperty("isFlushed"));
-      assert.ok(a.appenders[0].hasOwnProperty("formatter"));
-      assert.ok(!a.appenders[0].hasOwnProperty("key"));
-      assert.ok(a.appenders[0].hasOwnProperty("formattedPath"));
-      assert.ok(a.appenders[0].isFlushed);
-      assert.strictEqual(a.appenders[0].path, path);
-      assert.strictEqual(a.appenders[0].formattedPath, moment().format(path));
-
-      a = new ln("a", [{ "type": "console", "level": "info" }]);
-      assert.ok(a.appenders[0].hasOwnProperty("formatter"));
-
-      a = new ln("a", [{ "level": "info", "formatter": JSON.stringify }]);
+      assert.strictEqual(log.appenders[0].level, 30);
+      assert.strictEqual(log.appenders[0].formatter, formatter0);
+      assert.strictEqual(log.appenders[1].level, 10);
+      assert.strictEqual(log.appenders[1].formatter, formatter1);
     });
   });
 });
 
-describe("log", function () {
-  var name = "test";
-  var message1 = "message1";
-  var error1 = new Error("error1");
-  var json1 = { "value": "json1" };
-  var message2 = "message2";
-  var error2 = new Error("error2");
-  var json2 = { "value": "json2" };
+describe("Verify the ln object", function () {
+  var formatter = function () { },
+      path = "[./ln]YYYYMMDDHH[][][][][[][][][][]][.log]",
+      log = new ln({"name": "ln", "appenders": [{"type": "console", "level": "trace", "formatter": formatter}, {"type": "file", "path": path, "isUTC": false}]});
 
-  var log = new ln(name, [ { "type": "test", "level": "info" } ]);
-  var appender = log.appenders[0];
-
-  it("a simple string", function () {
-    appender.write = function (timestamp, string) {
-      var data = JSON.parse(string);
-      assert.strictEqual(data.n, name);
-      assert.strictEqual(data.h, os.hostname());
-      assert.strictEqual(data.l, log.appenders[0].level);
-      assert.strictEqual(data.p, process.pid);
-      assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
-      assert.strictEqual(data.m, message1);
-    };
-    log.info(message1);
-  });
-
-  it("an error", function () {
-    appender.write = function (timestamp, string) {
-      var data = JSON.parse(string);
-      assert.strictEqual(data.n, name);
-      assert.strictEqual(data.h, os.hostname());
-      assert.strictEqual(data.l, log.appenders[0].level);
-      assert.strictEqual(data.p, process.pid);
-      assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
-      assert.strictEqual(data.m, error1.stack);
-    };
-    log.info(error1);
-  });
-
-  it("a simple string and an object", function () {
-    appender.write = function (timestamp, string) {
-      var data = JSON.parse(string);
-      assert.strictEqual(data.n, name);
-      assert.strictEqual(data.h, os.hostname());
-      assert.strictEqual(data.l, log.appenders[0].level);
-      assert.strictEqual(data.p, process.pid);
-      assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
-      assert.strictEqual(data.m, message1);
-      assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json1));
-    };
-    log.info(message1, json1);
-  });
-
-  it("multiple strings, objects and errors", function () {
-    appender.write = function (timestamp, string) {
-      var data = JSON.parse(string);
-      assert.strictEqual(data.n, name);
-      assert.strictEqual(data.h, os.hostname());
-      assert.strictEqual(data.l, log.appenders[0].level);
-      assert.strictEqual(data.p, process.pid);
-      assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
-      assert.strictEqual(data.m, message2);
-      assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json2));
-    };
-    log.info(error1, error2, message1, message2, json1, json2);
-  });
-
-  it("with multiple strings, objects, errors", function () {
-    appender.write = function (timestamp, string) {
-      var data = JSON.parse(string);
-      assert.strictEqual(data.n, name);
-      assert.strictEqual(data.h, os.hostname());
-      assert.strictEqual(data.l, log.appenders[0].level);
-      assert.strictEqual(data.p, process.pid);
-      assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
-      assert.strictEqual(data.m, message2);
-      assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json2));
-    };
-    log.info(error1, error2, message1, message2, json1, json2);
-  });
-
-  it("a simple string", function () {
-    appender.write = function (timestamp, string) {
-      var data = JSON.parse(string);
-      assert.strictEqual(data.n, name);
-      assert.strictEqual(data.h, os.hostname());
-      assert.strictEqual(data.l, log.appenders[0].level);
-      assert.strictEqual(data.p, process.pid);
-      assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
-      assert.strictEqual(data.m, message1);
-      assert.ok(!data.hasOwnProperty("j"));
-    };
-    log.info(message1);
-  });
-
-  it("a simple json", function () {
-    appender.write = function (timestamp, string) {
-      var data = JSON.parse(string);
-      assert.strictEqual(data.n, name);
-      assert.strictEqual(data.h, os.hostname());
-      assert.strictEqual(data.l, log.appenders[0].level);
-      assert.strictEqual(data.p, process.pid);
-      assert.strictEqual(data.v, VERSION);
-      assert.strictEqual(data.t, timestamp);
-      assert.ok(!data.hasOwnProperty("m"));
-      assert.strictEqual(JSON.stringify(data.j), JSON.stringify(json1));
-    };
-    log.info(json1);
-  });
-
-  it("with a custom formatter", function () {
-    appender.formatter = function (json) {
-      return util.format("[%s] [%s] [%s] - [%s]", json.t, ln.LEVEL[json.l], json.n, json.m);
-    };
-    appender.write = function (timestamp, string) {
-      assert.strictEqual(string, util.format("[%s] [%s] [%s] - [%s]\n", timestamp, ln.LEVEL[log.appenders[0].level], name, message1));
-    };
-    log.info(message1);
-  });
-});
-
-describe("file type appender", function () {
-  var path = "", log = null;
-  it("with a fixed path", function () {
-    path = "[./ln.log][][][][][[][][][][]]";
-    log = new ln("ln", [ { "type": "file", "level": "info", "path": path } ]);
-    log.info("ln");
-    assert.ok(log.appenders[0].hasOwnProperty("formattedPath"));
-    assert.ok(!log.appenders[0].hasOwnProperty("period"));
-    assert.ok(!log.appenders[0].hasOwnProperty("next"));
-    assert.strictEqual(log.appenders[0].formattedPath, moment().format(path));
-    assert.ok(fs.existsSync(moment().format(path)));
-  });
-
-  it("with a date path", function () {
-    path = "[./ln.log.]YYYYMMDDHHmmss";
-    log = new ln("ln", [ { "type": "file", "level": "info", "path": path } ]);
-    log.info("ln");
-    assert.ok(log.appenders[0].hasOwnProperty("formattedPath"));
-    assert.ok(log.appenders[0].hasOwnProperty("period"));
-    assert.ok(log.appenders[0].hasOwnProperty("next"));
-    assert.strictEqual(log.appenders[0].formattedPath, moment().format(path));
-    assert.ok(fs.existsSync(moment().format(path)));
-    setTimeout(function () {
-      log.info("ln");
-      assert.ok(fs.existsSync(moment().format(path)));
-    }, 3);
-  });
-});
-
-describe("verify", function () {
-  var count = 0;
-  var add = function () {
-    count++;
-  };
-
-  it("cloned log", function () {
-    var log = new ln("ln", [ { "type": "test", "level": "info" } ]);
-    var clog = log.clone("cln");
-    assert.strictEqual(log.appenders, clog.appenders);
+  it("should have basic props", function () {
+    assert(log);
+    assert(log.appenders);
+    assert(log.fields);
     assert.strictEqual(log.fields.n, "ln");
-    assert.strictEqual(clog.fields.n, "cln");
-    count = 0;
-    log.appenders[0].write = add;
-    log.info("");
-    clog.info("");
-    assert.strictEqual(count, 2);
+    assert.strictEqual(log.fields.h, os.hostname());
+    assert.strictEqual(log.fields.p, process.pid);
+    assert.strictEqual(log.fields.v, VERSION);
   });
 
-  it("all levels", function () {
-    var log = new ln("level", [ { "type": "test", "level": "trace" } ]);
-    count = 0;
-    log.appenders[0].write = add;
-    log.trace("");
-    log.debug("");
-    log.info("");
-    log.error("");
-    log.fatal("");
-    assert.strictEqual(count, 5);
+  describe("whose console appender", function () {
+    it("should have specific props and functions", function () {
+      var l = log.appenders[0];
+
+      assert(l.write);
+      assert.strictEqual(l.level, 10);
+      assert.strictEqual(l.formatter, formatter);
+    });
   });
 
-  it("a single level", function () {
-    var log = new ln("level", [ { "type": "test", "level": "fatal" } ]);
-    count = 0;
-    log.appenders[0].write = add;
-    log.trace("");
-    log.debug("");
-    log.info("");
-    log.error("");
-    log.fatal("");
-    assert.strictEqual(count, 1);
+  describe("whose file appender", function () {
+    it("should have specific props and functions", function () {
+      var l = log.appenders[1];
+
+      ln.PIPE_BUF = 512;
+      assert(l.write);
+      assert.strictEqual(l.level, 10);
+      assert.strictEqual(l.formatter, JSON.stringify);
+      assert.strictEqual(l.period, "h");
+      assert(l.isFlushed);
+      assert(l.queue);
+      log.i("i");
+      assert(l.stream);
+      assert.strictEqual(ln.PIPE_BUF, 512);
+      assert.strictEqual(l.formattedPath, moment().format(path));
+      var date = new Date();
+
+      assert.strictEqual(l.next, moment([date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()]).add(1, "h").valueOf());
+      assert.ok(fs.existsSync(moment().format(path)));
+    });
+  });
+});
+
+describe("Verify the log level", function () {
+  var n,
+      write = function () {
+        n++;
+      },
+      logFunction = function (log) {
+        log.t("ln");
+        log.d("ln");
+        log.i("ln");
+        log.w("ln");
+        log.e("ln");
+        log.f("ln");
+      };
+
+  it("with a single ln should log certain times", function (done) {
+    var log = new ln({"name": "ln", "appenders": [{"write": write, "level": "error"}]});
+
+    n = 0;
+    logFunction(log);
+    assert.strictEqual(n, 2);
+    done();
   });
 
-  it("multiple streams with multiple levels", function () {
-    var log = new ln("level", [
-      { "type": "error", "level": "error" },
-      { "type": "debug", "level": "debug" }
-    ]);
-    count = 0;
-    log.appenders[0].write = add;
-    log.appenders[1].write = add;
-    log.trace("");
-    log.debug("");
-    log.info("");
-    log.error("");
-    log.fatal("");
-    assert.strictEqual(count, 6);
+  it("with multiple ln(s) should log certain times", function (done) {
+    var log0 = new ln({"name": "ln", "appenders": [{"write": write, "level": "error"}]}),
+        log1 = new ln({"name": "ln", "appenders": [{"write": write, "level": "debug"}]});
+
+    n = 0;
+    logFunction(log0);
+    logFunction(log1);
+    assert.strictEqual(n, 7);
+    done();
+  });
+});
+
+describe("Log", function () {
+  var log = new ln({"name": "test", "appenders": [{"level": "trace"}]});
+
+  describe("without pass anything", function () {
+    it("should have nothing", function () {
+      log.appenders[0].write = function () {
+        assert(false);
+      };
+
+      log.trace();
+    });
+  });
+
+  describe("a simple string at trace level", function () {
+    it("should have the trace stack and the fields, n, h, l, p, v and t with correct values", function () {
+      log.appenders[0].write = function (timestamp, string) {
+        var json = JSON.parse(string);
+
+        assert.strictEqual(json.n, "test");
+        assert.strictEqual(json.h, os.hostname());
+        assert.strictEqual(json.l, log.appenders[0].level);
+        assert.strictEqual(json.p, process.pid);
+        assert.strictEqual(json.v, VERSION);
+        assert.strictEqual(json.t, timestamp);
+        assert(json.m.length);
+      };
+
+      log.trace(1);
+    });
+  });
+
+  describe("a simple string", function () {
+    it("should have this string", function () {
+      var m = "string";
+
+      log.appenders[0].write = function (timestamp, string) {
+        var json = JSON.parse(string);
+
+        assert.strictEqual(json.m, m);
+      };
+
+      log.info(m);
+    });
+  });
+
+  describe("an error", function () {
+    it("should have the error stack", function () {
+      var e = new Error("error");
+
+      log.appenders[0].write = function (timestamp, string) {
+        var json = JSON.parse(string);
+
+        assert.strictEqual(json.m, e.stack);
+      };
+
+      log.info(e);
+    });
+  });
+
+  describe("a json", function () {
+    it("should have this json", function () {
+      var j = {"json": "json"};
+
+      log.appenders[0].write = function (timestamp, string) {
+        var json = JSON.parse(string);
+
+        assert.strictEqual(JSON.stringify(j), JSON.stringify(json.j));
+      };
+
+      log.info(j);
+    });
+  });
+
+  describe("multiple messages, errors and objects", function () {
+    it("should log the last values", function () {
+      var j0 = {"json0": "json0"},
+          j1 = {"json1": "json1"},
+          m0 = "string0",
+          m1 = "string1",
+          e0 = new Error("error0"),
+          e1 = new Error("error1");
+
+      log.appenders[0].write = function (timestamp, string) {
+        var json = JSON.parse(string);
+
+        assert.strictEqual(JSON.stringify(j1), JSON.stringify(json.j));
+        assert.strictEqual(JSON.stringify(m1), JSON.stringify(json.m));
+      };
+
+      log.info(j0, j1, e0, e1, m0, m1);
+
+      log.appenders[0].write = function (timestamp, string) {
+        var json = JSON.parse(string);
+
+        assert.strictEqual(JSON.stringify(j1), JSON.stringify(json.j));
+        assert.strictEqual(JSON.stringify(e1.stack), JSON.stringify(json.m));
+      };
+
+      log.info(j0, j1, m0, m1, e0, e1);
+    });
   });
 });
