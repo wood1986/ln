@@ -6,10 +6,11 @@
 * Super small memory footprint
 * Support cluster logging on the same file with date rotation and custom file naming
 
-## Changelog 0.3.0
+## Changelog 0.3.1
 
 * Prepare the deprecation for `ln.clone(name)`, `ln(name, appenders)` and `PIPE_BUFF`.
-  * `ln.clone(name) -> new ln(name, ln)`
+  * `ln.clone(name) -> new ln({"name": name, "ln": ln})`
+  * `new ln(name, ln) -> new ln({"name": name, "ln": ln})`
   * `new ln(name, appenders) -> new ln({"name": name, "appenders": appenders})`
   * `PIPE_BUFF -> PIPE_BUF`
 * Modularize the console and file appender
@@ -78,7 +79,8 @@
 #### Referencing to existing appenders with another name
 
     //Code:
-    logB = new ln("b", logA);
+    var logA = new ln({"name": "a", "appenders": [{}]}),
+        logB = new ln({"name": "b", "ln": logA});
     logB.error("Error");  //This is good for distinguishing the log messages from which ln
 
 
@@ -156,8 +158,8 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
     log4js  0.6.29  async   7.64s   7.18s   1.82s  30MB
     winston 2.1.1   sync    6.33s   6.17s   0.19s  265MB
     winston 2.1.1   async   8.42s   7.83s   1.85s  48MB
-    ln      0.3.0   sync    1.11s*  1.01s*  0.11s  89MB
-    ln      0.3.0   async   3.92s*  3.55s*  1.48s* 26MB*
+    ln      0.3.1   sync    1.11s*  1.01s*  0.11s  89MB
+    ln      0.3.1   async   3.92s*  3.55s*  1.48s* 26MB*
     ln      0.2.2   sync    1.18s   1.09s   0.10s  88MB
     ln      0.2.2   async   4.03s   3.67s   1.39s  22MB
 

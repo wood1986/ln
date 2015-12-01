@@ -47,10 +47,28 @@ describe("Instantiate an object", function () {
     it("should not throw an exception", function () {
       assert.doesNotThrow(function () {
         new ln("ln", new ln({"name": "ln", "appenders": [{"type": "console"}]}));
+        new ln({"name": "ln", "ln": new ln({"name": "ln", "appenders": [{"type": "console"}]})});
         new ln({"name": "ln", "appenders": [{"type": "file", "path": "./a"}]});
-        new ln("ln", [{"type": "console"}]);
+        new ln("ln", [{"type": "console"}]).clone("a");
         new ln("", [{}]);
       });
+    });
+
+    it("should be correctly referencing", function () {
+      var a = new ln({"name": "a", "appenders": [{}]}),
+          b = new ln("b", a),
+          c = new ln({"name": "c", "ln": b}),
+          d = new ln("d", c.appenders),
+          e = d.clone("e"),
+          z = [a, b, c, d, e];
+
+      for (var i = 0, il = z.length; i < il; i++) {
+        for (var j = i + 1, jl = z.length; j < jl; j++) {
+          assert.notStrictEqual(z[i], z[j]);
+          assert.notStrictEqual(z[i].fields, z[j].fields);
+          assert.strictEqual(z[i].appenders, z[j].appenders);
+        }
+      }
     });
 
     it("should have t, d, i, w, e, f, trace, debug, info, warn, error, fatal", function () {
