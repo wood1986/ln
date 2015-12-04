@@ -3,97 +3,88 @@
 var cluster = require("cluster"),
     assert = require("assert"),
     fs = require("fs"),
-    os = require("os");
+    mm = require("micromatch"),
+    async = require("async");
+
+var w = 1000;
 
 if (cluster.isMaster) {
   var i = 0,
-      n = require("os").cpus().length;
+      n = require("os").cpus().length,
+      m = {};
 
   while (i++ < n) cluster.fork(); // eslint-disable-line curly
   i = 0;
+
   cluster.on("exit", function (worker, code, signal) {
     assert.deepStrictEqual(code, 0);
     assert(!signal);
-  });
-} else {
-  var ln = require("../lib/ln.js"),
-      mm = require("micromatch"),
-      util = require("util"),
-      async = require("async");
 
-  var log = new ln({  // eslint-disable-line new-cap
-    "name": "cluster",
-    "appenders": [
-        {
-          "type": "file",
-          "path": util.format("[./cluster.%d.]x[.log]", process.pid)
-        }
-    ]
-  });
+    i++;
+    m[worker.process.pid] = 0;
 
-  async.times(
-    10000,
-    function (n, callback) {
-      log.i(n);
-      setImmediate(callback);
-    },
-    function (err) {
-      if (err) {
-        throw err;
-      }
-
-      async.until(
-        function () {
-          return Object.keys(log.appenders[0].queue).length === 0;
-        },
-        function (callback) {
-          setImmediate(callback);
-        },
-        function (err) {
+    if (i === n) {
+      fs.readdir(
+        "./",
+        function (err, files) {
           if (err) {
             throw err;
           }
 
-          fs.readdir("./", function (err, files) {
-            if (err) {
-              throw err;
-            }
-
-            var i = 0;
-
-            async.eachSeries(
-              mm(files, util.format("cluster.%d.*.log", process.pid)),
-              function (file, callback) {
-                var rl = require("readline").createInterface(
+          async.eachSeries(
+            mm(files, "cluster.*.log"),
+            function (file, callback) {
+              var rl = require("readline").createInterface({
+                "input": fs.createReadStream(
+                  file,
                     {
-                      "input": fs.createReadStream(
-                        file,
-                          {
-                            "flag": "r",
-                            "autoClose": true
-                          }
-                      )
+                      "flag": "r",
+                      "autoClose": true
                     }
-                  );
+                )
+              });
 
-                rl.on("line", function (line) {
-                  var json = JSON.parse(line);
+              rl.on("line", function (line) {
+                var json = JSON.parse(line);
 
-                  assert.deepStrictEqual(json.n, "cluster");
-                  assert.deepStrictEqual(json.v, 0);
-                  assert.deepStrictEqual(json.h, os.hostname());
-                  assert.deepStrictEqual(json.l, 30);
-                  assert.deepStrictEqual(json.p, process.pid);
-                  assert.deepStrictEqual(json.t, parseInt(file.split(".")[2], 10));
-                  assert.deepStrictEqual(json.m, i++);
-                });
-                rl.on("close", callback);
-              },
-              process.exit
-            );
-          });
+                assert.deepStrictEqual(json.m, m[json.p]++);
+              });
+              rl.on("close", callback);
+            },
+            function (err) {
+              if (err) {
+                throw err;
+              }
+
+              for (var l in m) {  // eslint-disable-line guard-for-in
+                assert.deepStrictEqual(m[l], w - 1);
+              }
+            }
+          );
         }
       );
     }
-  );
+  });
+} else {
+  var ln = require("../lib/ln.js");
+
+  var log = new ln({  // eslint-disable-line new-cap
+        "name": "cluster",
+        "appenders": [{
+          "type": "file",
+          "path": "[./cluster.]x[.log]"
+        }]
+      }),
+      l = 0,
+      immediate = function () {
+        log.info(l++);
+        if (l < w) {
+          setImmediate(immediate);
+        } else {
+          process.exit(); // eslint-disable-line no-process-exit
+        }
+        return;
+      };
+
+  setImmediate(immediate);
 }
