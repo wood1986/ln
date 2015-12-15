@@ -1,6 +1,6 @@
 {
   "name": "ln",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "The SUPER BEST JSON logging library for Node.js",
   "main": "./lib/ln.js",
   "dependencies": {

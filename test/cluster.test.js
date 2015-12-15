@@ -6,9 +6,11 @@ var cluster = require("cluster"),
     mm = require("micromatch"),
     async = require("async");
 
-var w = 1000;
+var w = 10000,
+    x = {},
+    useCluster = true;
 
-if (cluster.isMaster) {
+if (cluster.isMaster && useCluster) {
   var i = 0,
       n = require("os").cpus().length,
       m = {};
@@ -47,7 +49,17 @@ if (cluster.isMaster) {
               rl.on("line", function (line) {
                 var json = JSON.parse(line);
 
-                assert.deepStrictEqual(json.m, m[json.p]++);
+                if (x[json.p]) {
+                  return;
+                }
+
+                if (json.m === m[json.p]) {
+                  m[json.p]++;
+                } else if (json.m < m[json.p]) {
+                  console.log("Duplicated log : ", line);
+                } else {
+                  x[json.p] = true;
+                }
               });
               rl.on("close", callback);
             },
@@ -57,7 +69,7 @@ if (cluster.isMaster) {
               }
 
               for (var l in m) {  // eslint-disable-line guard-for-in
-                assert.deepStrictEqual(m[l], w - 1);
+                assert.deepStrictEqual(m[l], w, "Wrong num of log entries " + JSON.stringify(m));
               }
             }
           );

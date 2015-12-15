@@ -4,11 +4,12 @@
 
 * Super fast file logging
 * Super small memory footprint
+* Super reliable when the node quits unexpectedly
 * Support cluster logging on the same file with date rotation and custom file naming
 
-## Changelog 0.3.1
+## Changelog since 0.2.3
 
-* Prepare the deprecation for `ln.clone(name)`, `ln(name, appenders)` and `PIPE_BUFF`.
+* Prepare the deprecation for `ln.clone(name)`, `ln(name, appenders)` and `PIPE_BUFF`
   * `ln.clone(name) -> new ln({"name": name, "ln": ln})`
   * `new ln(name, ln) -> new ln({"name": name, "ln": ln})`
   * `new ln(name, appenders) -> new ln({"name": name, "appenders": appenders})`
@@ -17,7 +18,9 @@
 * Increase the logging performance by ~5%
 * Fix the filename bug when isUTC is true
 * Pre-define the default values for certain parameters
-* Update README.md
+* Handle the log entries when node quits unexpectedly
+  * Duplicated log entries is a known issue and it cannot be fixed at this moment
+    * It happens when the node quits unexpectedly during the write because node has already exited the event loop and it will not execute any async operations. The async operation in this case is "drain"s' callback which is the place of deleting of the log entries. My goal is to make sure everything is written to file before the quit.
 
 ## FAQ
 
@@ -134,7 +137,7 @@
       ]
     );
 
-### 3. How super fast and small is it?
+### 3. How super fast, small and reliable is it?
 
 #### Testing environment
 
@@ -143,25 +146,26 @@ Mac mini (Mid 2011)
 * 2.3GHz i5
 * 8GB RAM
 * 128GB SSD
-* OS X 10.11.1
-* Node.js 5.1.0
+* OS X 10.11.2
+* Node.js 5.2.0
 
 #### Testing result
 
 Thanks Ryan for making the benchmark script async. See [this](https://github.com/wood1986/ln/pull/3)
 
-    name    version (a)sync real    user    sys    rss
-    ====================================================
-    bunyan  1.5.1   sync    3.30s   3.21s   0.09s  83MB
-    bunyan  1.5.1   async   5.90s   5.45s   1.53s  29MB
-    log4js  0.6.29  sync    4.46s   4.38s   0.09s  77MB
-    log4js  0.6.29  async   7.64s   7.18s   1.82s  30MB
-    winston 2.1.1   sync    6.33s   6.17s   0.19s  265MB
-    winston 2.1.1   async   8.42s   7.83s   1.85s  48MB
-    ln      0.3.1   sync    1.11s*  1.01s*  0.11s  89MB
-    ln      0.3.1   async   3.92s*  3.55s*  1.48s* 26MB*
-    ln      0.2.2   sync    1.18s   1.09s   0.10s  88MB
-    ln      0.2.2   async   4.03s   3.67s   1.39s  22MB
+    name    version async  real(s)  user(s) sys(s)  rss(MB) tail
+    ============================================================
+    bunyan  1.5.1   false   3.32    3.17    0.10    82
+    bunyan  1.5.1   true    6.28    5.82    1.68    24	    {"name":"bunyan","hostname":"WooDs-Mac-mini.local","pid":6984,"level":30,"msg":"99998","time":"2015-12-15T07:32:53.825Z","v":0}
+    log4js  0.6.29  false   4.11    4.04    0.08    77
+    log4js  0.6.29  true    6.95    6.54    1.55    29	    [2015-12-14 23:33:16.602] [INFO] log4js - 99998
+    winston 2.1.1   false   6.22    6.01    0.21    262
+    winston 2.1.1   true    7.97    7.51    1.66    48	    {"level":"info","message":"99998","timestamp":"2015-12-15T07:33:44.081Z"}
+    ln	    0.4.0   false   1.04*   0.94*   0.09*   88	    {"n":"ln","h":"WooDs-Mac-mini.local","p":7084,"v":0,"t":1450164826015,"l":30,"m":99999}
+    ln	    0.4.0   true    4.03*   3.66*   1.45*   22*	    {"n":"ln","h":"WooDs-Mac-mini.local","p":7100,"v":0,"t":1450164834237,"l":30,"m":99999}
+
+
+`bunyan`, `log4js` and `winston` lost all the logs in sync test and lost the last log in async test because their final message was 99998 instead of 99999.
 
 ### 4. How can I verify your test?
 
@@ -180,11 +184,11 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 * `m`: message
 * `j`: json
 
-### 6. Why does ln not use a readable name?
+### 6. Why doesn't ln use a readable name?
 
 * This can make the write process and the file size slightly faster and smaller respectively.
 
-### 7. Existing logging libraries have rotation problem with cluster module. Why does ln not have this issue?
+### 7. Existing logging libraries have rotation problem with cluster module. Why doesn't ln have this issue?
 
 * Both bunyan and log4js rename the log file on rotation. The disaster happens on file renaming under cluster environment because of double files renaming.
 * bunyan suggests using the process id as a part of the filename to tackle this issue. However, this will generate too many files.
