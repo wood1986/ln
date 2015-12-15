@@ -18,9 +18,9 @@
 * Increase the logging performance by ~5%
 * Fix the filename bug when isUTC is true
 * Pre-define the default values for certain parameters
-* Handle the log entries when node quits unexpectedly
+* Handle the log entries when the node quits unexpectedly
   * Duplicated log entries is a known issue and it cannot be fixed at this moment
-    * It happens when the node quits unexpectedly during the write because node has already exited the event loop and it will not execute any async operations. The async operation in this case is "drain"s' callback which is the place of deleting of the log entries. My goal is to make sure everything is written to file before the quit.
+    * It happens when the node quits unexpectedly during the write because the event loop is no longer executing any async operations. The async operation in this case is `drain`'s callback which is the place of deleting the written log entries from queue. Therefore, it's impossible to know whether the previous write is successful in this situation. My goal is to make sure everything is written to file before the quit.
 
 ## FAQ
 
