@@ -13,7 +13,7 @@ module.exports = function (log) {
     }
 
     if (exit) {
-      process.exit(); // eslint-disable-line no-process-exit
+      throw new Error(); // eslint-disable-line no-process-exit
     }
   } else {
     var immediate = function () {
@@ -22,7 +22,7 @@ module.exports = function (log) {
         clearImmediate(this);
         setImmediate(immediate);
       } else if (exit) {
-        process.exit(); // eslint-disable-line no-process-exit
+        throw new Error(); // eslint-disable-line no-process-exit
       }
     };
 

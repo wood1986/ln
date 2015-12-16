@@ -40,7 +40,7 @@ for (var i = 0; i < files.length; i++) {
     "name": files[i],
     "async": false,
     "exit": true,
-    "cmd": util.format("rm -rf %s.log && node %s.js sync %d exit && tail -1 %s.log", files[i], files[i], n, files[i])
+    "cmd": util.format("rm -rf %s.log && node %s.js sync %d exit || tail -1 %s.log", files[i], files[i], n, files[i])
   });
 
   tasks.push({
@@ -54,7 +54,7 @@ for (var i = 0; i < files.length; i++) {
     "name": files[i],
     "async": true,
     "exit": true,
-    "cmd": util.format("rm -rf %s.log && node %s.js async %d exit && tail -1 %s.log", files[i], files[i], n, files[i])
+    "cmd": util.format("rm -rf %s.log && node %s.js async %d exit || tail -1 %s.log", files[i], files[i], n, files[i])
   });
 }
 
