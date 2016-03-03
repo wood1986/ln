@@ -39,10 +39,10 @@ if (cluster.isMaster && useCluster) {
               var rl = require("readline").createInterface({
                 "input": fs.createReadStream(
                   file,
-                    {
-                      "flag": "r",
-                      "autoClose": true
-                    }
+                  {
+                    "flag": "r",
+                    "autoClose": true
+                  }
                 )
               });
 
