@@ -1,3 +1,5 @@
+/* eslint-disable prefer-arrow-callback, id-length, no-magic-numbers, new-cap, object-shorthand, prefer-template */
+
 "use strict";
 
 var cluster = require("cluster"),
@@ -15,10 +17,10 @@ if (cluster.isMaster && useCluster) {
       n = require("os").cpus().length,
       m = {};
 
-  while (i++ < n) cluster.fork(); // eslint-disable-line curly
+  while (i++ < n) cluster.fork();  // eslint-disable-line curly
   i = 0;
 
-  cluster.on("exit", function (worker, code, signal) {
+  cluster.on("exit", function(worker, code, signal) {
     assert.deepStrictEqual(code, 0);
     assert(!signal);
 
@@ -28,14 +30,14 @@ if (cluster.isMaster && useCluster) {
     if (i === n) {
       fs.readdir(
         "./",
-        function (err, files) {
+        function(err, files) {
           if (err) {
             throw err;
           }
 
           async.eachSeries(
             mm(files, "cluster.*.log"),
-            function (file, callback) {
+            function(file, callback) {
               var rl = require("readline").createInterface({
                 "input": fs.createReadStream(
                   file,
@@ -46,7 +48,7 @@ if (cluster.isMaster && useCluster) {
                 )
               });
 
-              rl.on("line", function (line) {
+              rl.on("line", function(line) {
                 var json = JSON.parse(line);
 
                 if (x[json.p]) {
@@ -55,20 +57,18 @@ if (cluster.isMaster && useCluster) {
 
                 if (json.m === m[json.p]) {
                   m[json.p]++;
-                } else if (json.m < m[json.p]) {
-                  console.log("Duplicated log : ", line);
-                } else {
+                } else if (json.m > m[json.p]) {
                   x[json.p] = true;
                 }
               });
               rl.on("close", callback);
             },
-            function (err) {
+            function(err) {  // eslint-disable-line no-shadow
               if (err) {
                 throw err;
               }
 
-              for (var l in m) {  // eslint-disable-line guard-for-in
+              for (var l in m) {
                 assert.deepStrictEqual(m[l], w, "Wrong num of log entries " + JSON.stringify(m));
               }
             }
@@ -80,7 +80,7 @@ if (cluster.isMaster && useCluster) {
 } else {
   var ln = require("../lib/ln.js");
 
-  var log = new ln({  // eslint-disable-line new-cap
+  var log = new ln({
         "name": "cluster",
         "appenders": [{
           "type": "file",
@@ -88,12 +88,12 @@ if (cluster.isMaster && useCluster) {
         }]
       }),
       l = 0,
-      immediate = function () {
+      immediate = function() {
         log.info(l++);
         if (l < w) {
           setImmediate(immediate);
         } else {
-          process.exit(); // eslint-disable-line no-process-exit
+          process.exit();
         }
         return;
       };
