@@ -154,11 +154,11 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
     name    version async  real(s)  user(s) sys(s)  rss(MB) tail
     ============================================================
     bunyan  1.8.1   false   3.71    3.51    0.11    85
-    bunyan  1.8.1   true    6.70    6.24    1.81    30	    {"name":"bunyan","hostname":"WooDs-Mac-mini.local","pid":453,"level":30,"msg":"99998","time":"2016-05-16T06:31:03.107Z","v":0}
+    bunyan  1.8.1   true    6.70    6.24    1.81    30      {"name":"bunyan","hostname":"WooDs-Mac-mini.local","pid":453,"level":30,"msg":"99998","time":"2016-05-16T06:31:03.107Z","v":0}
     log4js  0.6.36  false   3.00    2.94    0.07    78
-    log4js  0.6.36  true    6.77    6.28    1.94    30	    [2016-05-15 23:31:22.055] [INFO] log4js - 99998
+    log4js  0.6.36  true    6.77    6.28    1.94    30      [2016-05-15 23:31:22.055] [INFO] log4js - 99998
     winston 2.2.0   false   4.48    4.35    0.13    248
-    winston 2.2.0   true    7.47    7.03    1.42    30	    {"level":"info","message":"99998","timestamp":"2016-05-16T06:31:45.347Z"}
+    winston 2.2.0   true    7.47    7.03    1.42    30      {"level":"info","message":"99998","timestamp":"2016-05-16T06:31:45.347Z"}
     ln      0.4.1   false   1.23*   1.09*   0.12*   89      {"n":"ln","h":"WooDs-Mac-mini.local","p":496,"v":0,"t":1463380307604,"l":30,"m":99999}
     ln      0.4.1   true    3.98*   3.62*   1.31*   24*     {"n":"ln","h":"WooDs-Mac-mini.local","p":504,"v":0,"t":1463380315700,"l":30,"m":99999}
 
