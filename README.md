@@ -4,12 +4,12 @@
 
 * Super fast file logging
 * Super small memory footprint
-* Super reliable no matter if the node quits unexpectedly
+* Super reliable no matter if node quits unexpectedly
 * Support cluster logging on the same file with date rotation and custom file naming
 
 ## Changelog since 0.2.3
 
-* Prepare the deprecation for `ln.clone(name)`, `ln(name, appenders)` and `PIPE_BUFF`
+* Remove `ln.clone(name)`, `ln(name, appenders)` and `PIPE_BUFF`
   * `ln.clone(name) -> new ln({"name": name, "ln": ln})`
   * `new ln(name, ln) -> new ln({"name": name, "ln": ln})`
   * `new ln(name, appenders) -> new ln({"name": name, "appenders": appenders})`
@@ -18,7 +18,7 @@
 * Increase the logging performance by ~5%
 * Fix the filename bug when isUTC is true
 * Pre-define the default values for certain parameters
-* Handle unwritten log entries when the node quits unexpectedly
+* Handle unwritten log entries when node quits unexpectedly
 
 ## FAQ
 
@@ -144,8 +144,8 @@ Mac mini (Mid 2011)
 * 2.3GHz i5
 * 8GB RAM
 * 128GB SSD
-* OS X 10.11.2
-* Node.js 5.2.0
+* OS X 10.11.4
+* Node.js 6.1.0
 
 #### Testing result
 
@@ -153,14 +153,14 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 
     name    version async  real(s)  user(s) sys(s)  rss(MB) tail
     ============================================================
-    bunyan  1.5.1   false   3.32    3.17    0.10    82
-    bunyan  1.5.1   true    6.28    5.82    1.68    24	    {"name":"bunyan","hostname":"WooDs-Mac-mini.local","pid":6984,"level":30,"msg":"99998","time":"2015-12-15T07:32:53.825Z","v":0}
-    log4js  0.6.29  false   4.11    4.04    0.08    77
-    log4js  0.6.29  true    6.95    6.54    1.55    29	    [2015-12-14 23:33:16.602] [INFO] log4js - 99998
-    winston 2.1.1   false   6.22    6.01    0.21    262
-    winston 2.1.1   true    7.97    7.51    1.66    48	    {"level":"info","message":"99998","timestamp":"2015-12-15T07:33:44.081Z"}
-    ln	    0.4.0   false   1.04*   0.94*   0.09*   88	    {"n":"ln","h":"WooDs-Mac-mini.local","p":7084,"v":0,"t":1450164826015,"l":30,"m":99999}
-    ln	    0.4.0   true    4.03*   3.66*   1.45*   22*	    {"n":"ln","h":"WooDs-Mac-mini.local","p":7100,"v":0,"t":1450164834237,"l":30,"m":99999}
+    bunyan  1.8.1   false   3.71    3.51    0.11    85
+    bunyan  1.8.1   true    6.70    6.24    1.81    30	    {"name":"bunyan","hostname":"WooDs-Mac-mini.local","pid":453,"level":30,"msg":"99998","time":"2016-05-16T06:31:03.107Z","v":0}
+    log4js  0.6.36  false   3.00    2.94    0.07    78
+    log4js  0.6.36  true    6.77    6.28    1.94    30	    [2016-05-15 23:31:22.055] [INFO] log4js - 99998
+    winston 2.2.0   false   4.48    4.35    0.13    248
+    winston 2.2.0   true    7.47    7.03    1.42    30	    {"level":"info","message":"99998","timestamp":"2016-05-16T06:31:45.347Z"}
+    ln	    0.4.1   false   1.23*   1.09*   0.12*   89	    {"n":"ln","h":"WooDs-Mac-mini.local","p":496,"v":0,"t":1463380307604,"l":30,"m":99999}
+    ln	    0.4.1   true    3.98*   3.62*   1.31*   24*	    {"n":"ln","h":"WooDs-Mac-mini.local","p":504,"v":0,"t":1463380315700,"l":30,"m":99999}
 
 
 `bunyan`, `log4js` and `winston` lost all the logs in the sync test and the last log in the sync and async test respectively. In the async test, their final log entry was `99998` instead of `99999`.
@@ -196,9 +196,9 @@ Thanks Ryan for making the benchmark script async. See [this](https://github.com
 ### 8. Does ln have limitations?
 
 * File size rotation does not support because keeping track of the file size before writing to the file is overhead and complicated.
-* The logging messages are not in order under cluster environment. If you just focus on them from one process, they are in order.
-* Duplicated log entries is a known issue and it cannot be fixed.
-  * It will happen when the node quits unexpectedly during the write because the node no longer runs any async operations in the event loop. The async operation, in this case, is `drain`'s callback which is the place of deleting the written log entries from RAM. Therefore, it's impossible to know whether the previous write is successful in this situation. My goal is to make sure everything is written to file before the quit.
+* The logging messages are not in order under cluster environment. If you just focus on one process, they are in order.
+* Duplicated log entries is a known issue when node quits unexpectedly during the write and it cannot be fixed.
+  * Because node no longer runs any async operations in the event loop. The async operation in this case is `drain`'s callback and it is the place of deleting the written log entries from RAM. Therefore, it's impossible to know the previous write is successful or not. My goal is to make sure everything is written to the file before the quit.
 
 ### 9. What are things missed?
 
