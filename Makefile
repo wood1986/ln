@@ -10,4 +10,14 @@ clean:
 
 all: clean eslint test
 
-.PHONY: test
+publish:
+	$(eval LEVEL := $(shell cut -d ' ' -f 1 <<< "$(LEVEL)"))
+	$(eval FROM := $(shell npm view ln version))
+	$(eval TO := $(shell semver $(FROM) -i $(LEVEL)))
+	@echo "$(FROM) -> $(TO)"
+	@read -p "Press <Enter> to continue or <Ctrl-C> to cancel..."
+	npm version $(TO)
+	git push
+	npm publish
+
+.PHONY: test publish
