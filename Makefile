@@ -6,7 +6,7 @@ test: clean
 	node ./test/cluster.test.js
 
 clean:
-	git clean -xf
+	git clean -xfq
 
 all: clean eslint test
 
